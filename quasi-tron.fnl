@@ -27,6 +27,7 @@
   `(set ,n (- ,n 1)))
 
 (fn love.load []
+  (math.randomseed (os.time))
   (love.window.setTitle "Quasi-Tron")
   (love.window.setMode defs.size.window.width defs.size.window.height
                        {:resizable true})

@@ -1,4 +1,4 @@
-(local paths (require :grapple.paths))
+(local { : paths } (require :grapple.paths))
 (local {: number-of-cells} (require :grapple.defs))
 (local {: flatten} (require :util.helpers))
 
@@ -9,14 +9,15 @@
 (fn board [number-of-rows]
   "Returns a game board composed of paths from the paths file. The board is an
   array of arrays, so each char of the path is a separate element."
-  (let [path-options (length paths.paths)
+  (let [path-options (length paths)
         rows []]
     (var rows-to-add number-of-rows)
     (while (> rows-to-add 0)
-      (let [candidate (. paths.paths (math.random 1 path-options))
-            candidate-length (length candidate)]
-        (when (<= candidate-length rows-to-add)
-          (set rows-to-add (- rows-to-add candidate-length))
+      (let [random-index (math.random 1 path-options)
+            candidate (. paths random-index )
+            candidate-rows (length candidate)]
+        (when (<= candidate-rows rows-to-add)
+          (set rows-to-add (- rows-to-add candidate-rows))
           (table.insert rows candidate))))
     (icollect [_ row (ipairs (flatten rows))]
       (utf8-chars row))))
