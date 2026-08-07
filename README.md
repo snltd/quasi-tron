@@ -6,6 +6,12 @@ In which I attempt to re-implement
 
 I have no idea how far I'll get. It's just a fun thing to try.
 
+Run whatever's there with
+
+```sh
+$ love .
+```
+
 ### Notes
 
 I started with
@@ -15,7 +21,7 @@ but stuck [fennel.lua](https://fennel-lang.org/downloads/fennel-1.6.1.lua) in
 
 I haven't bundled `fennel.lua` here. To get it:
 
-```
+```sh
 $ curl -o .lib/fennel.lua https://fennel-lang.org/downloads/fennel-1.6.1.lua
 ```
 
