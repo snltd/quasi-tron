@@ -1,6 +1,8 @@
 ## Quasi-Tron
 
-In which I attempt to kind-of re-implement
+[![Unit Tests](https://github.com/snltd/quasi-tron/actions/workflows/test.yml/badge.svg)](https://github.com/snltd/quasi-tron/actions/workflows/test.yml)
+
+In which I attempt to kind-of implement some interpretation of
 [Quazatron](https://torinak.com/qaop/play/quazatron) in
 [Fennel](https://fennel-lang.org/), using [LÖVE](https://www.love2d.org/).
 
@@ -54,7 +56,8 @@ I'm using:
   roots = ["flsproject.fnl"]
   language-servers = ["fennel-ls"]
   ```
-- [faith](https://git.sr.ht/~technomancy/faith/) for testing. The library is vendored in `.lib`:
+- [faith](https://git.sr.ht/~technomancy/faith/) for testing. The library is
+  vendored in `.lib`:
   ```sh
   $ curl -o .lib/faith.fnl https://git.sr.ht/~technomancy/faith/blob/main/faith.fnl
   ```
