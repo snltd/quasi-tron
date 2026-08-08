@@ -12,7 +12,7 @@
   (t.= 2.5 (h.half 5)))
 
 (fn test-zero? []
-  (t.= false (h.zero? 0))
+  (t.= true (h.zero? 0))
   (t.= false (h.zero? -1))
   (t.= false (h.zero? 1)))
 

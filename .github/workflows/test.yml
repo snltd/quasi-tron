@@ -2,13 +2,25 @@ name: Unit Tests
 
 # Needs Lua 5.1 cos that's what LOVE bundles. (Though we don't (yet?) need LOVE)
 
+permissions:
+  contents: write
 on:
   push:
+    branches:
+      - main
+    paths:
+      - "**/*.fnl"
+      - .github/workflows/test.yml
   pull_request:
+    paths:
+      - "**/*.fnl"
+      - .github/workflows/test.yml
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
       - name: Install Deps
