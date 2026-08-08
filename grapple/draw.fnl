@@ -1,6 +1,6 @@
 (local state (require :grapple.state))
 (local {: gcol : number-of-cells } (require :grapple.defs))
-(local {: sum : inc : dec : half : pp } (require :util.helpers))
+(local {: pos? : sum : inc : dec : half : pp : active? } (require :util.helpers))
 
 (local offset-x 100)
 (local offset-y 150)
@@ -42,8 +42,12 @@
 (fn ─ [x y]
   (let [x-left  (sx x)
         x-right (sx (inc x))
-        y       (sy y)]
-    (love.graphics.line x-left y x-right y)))
+        y-px    (sy y)]
+    (if (active? x y)
+      (in-colour side-colour
+        (fn []
+          (love.graphics.line x-left y-px x-right y-px)))
+      (love.graphics.line x-left y-px x-right y-px))))
 
 (fn ◁ [x y]
   (let [x-apex   (sx x)
@@ -222,6 +226,8 @@
           [0 0 0]))) 
         
 (fn who-is-winning-square [central-offset]
+  "Draws the big square at the top of the cell column which shows the current
+   state of the game."
   (let [left   (sx (inc central-offset))
         right  (+ left central-cell-width)
         bottom (+ offset-y (half y-scale))
@@ -241,6 +247,7 @@
 ))
 
 (fn central-column []
+  "Draws the column of cells the players compete to control"
   (let [central-offset (length (. state.board 1))]
   
   (who-is-winning-square central-offset)
@@ -248,22 +255,21 @@
     (central-cell central-offset row-idx))))
 
 (fn pip-arsenal []
+  "Draws the column of pips the player has in reserve"
   (let [left-offset -2]
     (for [i 1 state.pips.player]
       (▶ left-offset i true))))
 
 (fn player-pip []
+  "Draws the pip the player is controlling, wherever the state says it should
+   be. The paths are designed such that every row is always a valid position."
   (if (< 0 state.pips.player)
     (▶ (+ 2 (- 1 triangle-width)) state.pip-row.player true)))
 
-(fn active-pips []
-  (each [_ pip (ipairs state.active-pips)]
-  (▶ 3 pip.row))
-)
-  
 (set parse-cell
   (fn [col-idx row-idx cell board]
     (if (= :─ cell) (─ col-idx row-idx)
+        (= :◀ cell) (─ col-idx row-idx)
         (= :▶ cell) (▶ col-idx row-idx)
         (= :┤ cell) (┤ col-idx row-idx board)
         (= :├ cell) (├ col-idx row-idx board)
@@ -273,7 +279,7 @@
         (= :◁ cell) (◁ col-idx row-idx))))
 
 (fn board []
-  "Draw the grapple board. `board` is a vec of vecs, each cell being a unicode
+  "Draws the grapple board. `board` is a vec of vecs, each cell being a unicode
    character."
   (love.graphics.setLineWidth line-width)
   (love.graphics.setColor gcol.lines)
@@ -287,4 +293,4 @@
   (player-pip)
   (pip-arsenal))
 
-{: board : active-pips}
+{: board  }

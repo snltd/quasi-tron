@@ -23,6 +23,10 @@
     (icollect [_ row (ipairs (flatten rows))]
       (utf8-chars row))))
 
+; (fn active-cells [rows cols]
+;   ;; Where we store the ttl for every active cell
+;   (fcollect [_ 1 rows] (fcollect [_ 1 cols] 0)))
+  
 (fn cell-owners []
   "Alternate colours for the initial state of the central column"
   (fcollect [i 1 number-of-cells] (% i 2)))

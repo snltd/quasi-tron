@@ -40,6 +40,11 @@
   (t.= 10 (h.sum [1 2 3 4]))
   (t.= 0 (h.sum [])))
 
+(fn test-active? []
+  (local state {:active-cells {[1 6] 5 [1 5] 5 [1 4] 5}})
+  (t.= nil (h.active? 1 1))
+  (t.= true (h.active? 1 6)))
+
 {: test-inc
  : test-dec
  : test-half
@@ -47,5 +52,6 @@
  : test-pos?
  : test-nil?
  : test-not-nil?
+: test-active?
  : test-flatten
  : test-sum}

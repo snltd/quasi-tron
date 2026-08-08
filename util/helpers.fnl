@@ -1,4 +1,5 @@
 (local fennel (require :fennel))
+(local state (require :grapple.state))
 
 ;; Quality-of-life functions you might expect to find in a Lisp.
 
@@ -57,4 +58,24 @@
     (set total (+ total v)))
   total)
 
-{: zero? : pos? : nil? : not-nil? : pp : half : flatten : inc : dec : sum}
+(fn state-cell-idx [x y]
+  ;; Used to access state.active-cells
+  (+ x (* 100 y)))
+
+;; State things
+; 
+(fn active? [x y]
+  (. state.active-cells (state-cell-idx x y)))
+
+{: zero?
+ : pos?
+ : nil?
+ : not-nil?
+ : pp
+ : half
+ : flatten
+ : state-cell-idx
+ : inc
+ : dec
+ : sum
+ : active?}
