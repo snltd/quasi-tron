@@ -3,6 +3,7 @@
 (local {: flatten} (require :util.helpers))
 
 (fn utf8-chars [s]
+  "Breaks a unicode string down into an array of glyphs"
   (icollect [c (s:gmatch "[%z\001-\127\194-\244][\128-\191]*")]
     c))
 
@@ -23,6 +24,7 @@
       (utf8-chars row))))
 
 (fn cell-owners []
+  "Alternate colours for the initial state of the central column"
   (fcollect [i 1 number-of-cells] (% i 2)))
 
 {: board : cell-owners}

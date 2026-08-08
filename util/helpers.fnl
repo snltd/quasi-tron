@@ -1,4 +1,4 @@
-; (local fennel (require :lib.fennel))
+(local fennel (require :fennel))
 
 ;; Readability
 ; 
@@ -14,12 +14,27 @@
   "Return half of the given number"
   (/ n 2))
 
+(fn zero? [val]
+  "Is val zero?"
+  (= 0 val))
+
+(fn pos? [val]
+  "Is val a positive number?"
+  (< 0 val))
+
+(fn nil? [val]
+  "Is val nil?"
+  (= nil val))
+
+(fn not-nil? [val]
+  "Is val nil?"
+  (not= nil val))
+
 ;; Debugging
 
- (fn pp [x]
-   "Analog to Janet's pp"
-   ; (print (fennel.view x)))
-   )
+(fn pp [x]
+  "Analog to Janet's pp"
+  (print (fennel.view x)))
 
 ;; Data structure manipulation
 ; 
@@ -40,6 +55,4 @@
     (set total (+ total v)))
   total)
 
-{: pp : half : flatten : inc : dec : sum}
-
-
+{: zero? : pos? : nil? : not-nil? : pp : half : flatten : inc : dec : sum}

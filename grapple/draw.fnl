@@ -1,6 +1,6 @@
 (local state (require :grapple.state))
 (local {: gcol : number-of-cells } (require :grapple.defs))
-(local {: sum : inc : dec : half } (require :util.helpers))
+(local {: sum : inc : dec : half : pp } (require :util.helpers))
 
 (local offset-x 100)
 (local offset-y 150)
@@ -12,7 +12,7 @@
 (local vertical-height 0.5)
 (local ellipse-width 0.5)
 (local ellipse-eccentricity 3)
-(local line-width 6)
+(local line-width 7)
 (local central-cell-width (* 2 x-scale)) ; pixels
 (local edge-column-width 18)
 
@@ -23,11 +23,17 @@
 (fn sx [n] (+ offset-x (* n x-scale)))
 (fn sy [n] (+ offset-y (* n y-scale)))
 
-(fn in-colour [col f]
+(fn gwrap [f]
+  "convenience wrapper for temporarily changing colour, line-width etc"
   (love.graphics.push "all")
-  (love.graphics.setColor (unpack col))
   (f)
   (love.graphics.pop))
+
+(fn in-colour [col f]
+  (gwrap
+    (fn []
+      (love.graphics.setColor (unpack col))
+      (f))))
 
 (fn continue-line [x y board]
   (for [i (inc x) (length (. board 1))]
@@ -170,7 +176,8 @@
                                right top
                                right bottom
                                left bottom)
-  (─ 1 0)))
+  ; the home line for new pips. 
+  (love.graphics.line (sx 1) (sy 0)  (sx 2.5) (sy 0))))
 
 (fn central-column-stub [x y]
   (let [x-apex   (+ 5 (sx (+ x (- 1 triangle-width))))
@@ -191,17 +198,19 @@
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
         colour (if (= 0 (. state.cell-owner y)) gcol.left gcol.right)]
-      (in-colour colour
-        (fn []
-        (love.graphics.polygon :fill left top
-                                     right top
-                                     right bottom
-                                     left bottom)))
-      
-      (love.graphics.polygon :line left top
+    (in-colour colour
+      (fn []
+      (love.graphics.polygon :fill left top
                                    right top
                                    right bottom
                                    left bottom)))
+    (gwrap
+      (fn []
+        (love.graphics.setLineWidth 5)
+        (love.graphics.polygon :line left top
+                                     right top
+                                     right bottom
+                                     left bottom)))))
 
 (fn who-is-winning? []
   "Returns the colour for the who-is-winning square"
@@ -244,7 +253,13 @@
       (▶ left-offset i true))))
 
 (fn player-pip []
-  (▶ 2 state.pip-row.player true))
+  (if (< 0 state.pips.player)
+    (▶ (+ 2 (- 1 triangle-width)) state.pip-row.player true)))
+
+(fn active-pips []
+  (each [_ pip (ipairs state.active-pips)]
+  (▶ 3 pip.row))
+)
   
 (set parse-cell
   (fn [col-idx row-idx cell board]
@@ -272,4 +287,4 @@
   (player-pip)
   (pip-arsenal))
 
-{: board}
+{: board : active-pips}
