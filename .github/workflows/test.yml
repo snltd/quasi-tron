@@ -1,0 +1,36 @@
+name: Unit Tests
+
+# Needs Lua 5.1 cos that's what LOVE bundles. (Though we don't (yet?) need LOVE)
+
+permissions:
+  contents: write
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.fnl"
+      - .github/workflows/test.yml
+  pull_request:
+    paths:
+      - "**/*.fnl"
+      - .github/workflows/test.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
+      - name: Install Deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y lua5.1
+          curl -Lo /usr/local/bin/fennel https://fennel-lang.org/downloads/fennel-1.6.1
+          chmod +x /usr/local/bin/fennel
+          curl -o .lib/fennel.lua https://fennel-lang.org/downloads/fennel-1.6.1.lua
+          curl -o .lib/faith.fnl https://git.sr.ht/~technomancy/faith/blob/main/faith.fnl
+      - name: Run Fennel Unit Tests
+        env:
+          FENNEL_PATH: ".lib/?.fnl"
+        run: /usr/local/bin/fennel test/run.fnl
