@@ -1,13 +1,15 @@
 (local fennel (require :fennel))
 
+;; Quality-of-life functions you might expect to find in a Lisp.
+
 ;; Readability
 ; 
 (fn inc [n]
-  "Return n with 1 added to it"
+  "Return n with 1 added to it. Use inc! to modify in-place"
   (+ 1 n))
 
 (fn dec [n]
-  "Return n with 1 subtracted from it"
+  "Return n with 1 subtracted from it. Use dec! to modify in-place"
   (- n 1))
 
 (fn half [n]
