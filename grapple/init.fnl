@@ -1,5 +1,4 @@
 (local { : paths } (require :grapple.paths))
-(local {: number-of-cells} (require :grapple.defs))
 (local {: flatten} (require :util.helpers))
 
 (fn utf8-chars [s]
@@ -7,12 +6,12 @@
   (icollect [c (s:gmatch "[%z\001-\127\194-\244][\128-\191]*")]
     c))
 
-(fn board [number-of-rows]
+(fn board [board-rows]
   "Returns a game board composed of paths from the paths file. The board is an
   array of arrays, so each char of the path is a separate element."
   (let [path-options (length paths)
         rows []]
-    (var rows-to-add number-of-rows)
+    (var rows-to-add board-rows)
     (while (> rows-to-add 0)
       (let [random-index (math.random 1 path-options)
             candidate (. paths random-index )
@@ -23,12 +22,8 @@
     (icollect [_ row (ipairs (flatten rows))]
       (utf8-chars row))))
 
-; (fn active-cells [rows cols]
-;   ;; Where we store the ttl for every active cell
-;   (fcollect [_ 1 rows] (fcollect [_ 1 cols] 0)))
-  
-(fn cell-owners []
+(fn cell-owners [board-rows]
   "Alternate colours for the initial state of the central column"
-  (fcollect [i 1 number-of-cells] (% i 2)))
+  (fcollect [i 1 board-rows] (% i 2)))
 
 {: board : cell-owners}

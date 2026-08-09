@@ -1,5 +1,5 @@
 (local state (require :grapple.state))
-(local {: gcol : number-of-cells } (require :grapple.defs))
+(local defs (require :grapple.defs))
 (local {: pos? : sum : inc : dec : half : pp : active? } (require :util.helpers))
 
 (local offset-x 100)
@@ -36,24 +36,24 @@
       (f))))
 
 (fn continue-line [x y board]
-  (for [i (inc x) (length (. board 1))]
-    (parse-cell i y (. (. board y) i) board)))
+  (for [i (inc x) (length (. board.paths 1))]
+    (parse-cell i y (. (. board.paths y) i) board)))
 
-(fn ─ [x y]
+(fn ─ [x y board]
   (let [x-left  (sx x)
         x-right (sx (inc x))
         y-px    (sy y)]
-    (if (active? x y)
+    (if (active? x y board)
       (in-colour side-colour
         (fn []
           (love.graphics.line x-left y-px x-right y-px)))
       (love.graphics.line x-left y-px x-right y-px))))
 
-(fn ─invert [x y]
+(fn ─invert [x y board]
   (let [x-left  (sx x)
         x-right (sx (inc x))
         y-px    (sy y)]
-    (if (active? x y)
+    (if (active? x y board)
       (in-colour other-colour
         (fn []
           (love.graphics.line x-left y-px x-right y-px)))
@@ -71,13 +71,13 @@
                                      x-base y-top
                                      x-base y-bottom)))))
 
-(fn ▶ [x y omit-line-segment]
+(fn ▶ [x y omit-line-segment board]
   (let [x-base   (sx x)
         x-apex   (sx (+ x triangle-width))
         y-apex   (sy y)
         y-bottom (sy (+ y triangle-height))
         y-top    (sy (- y triangle-height))]
-    (if (not omit-line-segment) (─ x y))
+    (if (not omit-line-segment) (─ x y board))
     (in-colour side-colour
       (fn [] (love.graphics.polygon :fill x-apex y-apex
                                           x-base y-top
@@ -110,7 +110,7 @@
         right  (sx (+ x vertical-width))
         top    (- (sy y) line-width)
         bottom (sy (+ y vertical-height))]
-    (─ x y)
+    (─ x y board)
     (in-colour side-colour
       (fn []
         (love.graphics.polygon :fill left bottom
@@ -124,7 +124,7 @@
         right  (sx (+ x vertical-width))
         top    (sy (- y vertical-height))
         bottom (+ line-width (sy y))]
-    (─ x y)
+    (─ x y board)
     (in-colour side-colour
       (fn []
         (love.graphics.polygon :fill left bottom
@@ -144,10 +144,10 @@
                                      left top
                                      right top
                                      right bottom)))
-    (parse-cell x (inc y) (. (. board (inc y)) x) board)))
+    (parse-cell x (inc y) (. (. board.paths (inc y)) x) board)))
 
 (fn ├ [x y board]
-  (─ x y)
+  (─ x y board)
   (│ x y)
   (continue-line x y board))
 
@@ -167,8 +167,8 @@
 
 (fn ┤ [x y board]
   (│ x y)
-  (let [adj-up   (. (. board (dec y)) x)
-        adj-down (. (. board (inc y)) x)]
+  (let [adj-up   (. (. board.paths (dec y)) x)
+        adj-down (. (. board.paths (inc y)) x)]
     (if (= :┌ adj-up)   (┌ x (dec y) board)
         (= :│ adj-up)   (┤ x (dec y) board))
     (if (= :│ adj-down) (┤ (inc y) board)
@@ -179,7 +179,7 @@
   (let [left (- x edge-column-width)
         right x
         top (- offset-y y-scale)
-        bottom (+ offset-y (* (inc number-of-cells) y-scale))]
+        bottom (+ offset-y (* (inc defs.board.rows) y-scale))]
   (in-colour side-colour
     (fn []
       (love.graphics.polygon :fill left top
@@ -207,11 +207,12 @@
 
 (fn central-cell [x y]
   (central-column-stub x y)
+  (gwrap (fn [] (love.graphics.scale -1 1) (central-column-stub -23.2 y)))
   (let [left   (sx (inc x))
         right  (+ left central-cell-width)
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
-        colour (if (= 0 (. state.cell-owner y)) gcol.left gcol.right)]
+        colour (if (= 0 (. state.cells.owner y)) defs.gcol.left defs.gcol.right)]
     (in-colour colour
       (fn []
       (love.graphics.polygon :fill left top
@@ -228,10 +229,10 @@
 
 (fn who-is-winning? []
   "Returns the colour for the who-is-winning square"
-  (let [tie-score   (half number-of-cells)
-        right-score (sum state.cell-owner)]
-      (if (< right-score tie-score) gcol.left
-          (> right-score tie-score) gcol.right
+  (let [tie-score   (half defs.board.rows)
+        right-score (sum state.cells.owner)]
+      (if (< right-score tie-score) defs.gcol.left
+          (> right-score tie-score) defs.gcol.right
           ;; we'll need some flashing thing here at some point
           [0 0 0]))) 
         
@@ -258,10 +259,9 @@
 
 (fn central-column []
   "Draws the column of cells the players compete to control"
-  (let [central-offset (length (. state.board 1))]
-  
+  (let [central-offset defs.board.cols]
   (who-is-winning-square central-offset)
-  (for [row-idx 1 (length state.board)]
+  (for [row-idx 1 defs.board.rows]
     (central-cell central-offset row-idx))))
 
 (fn pip-arsenal []
@@ -270,19 +270,20 @@
     (for [i 1 state.pips.player]
       (▶ left-offset i true))))
 
-(fn player-pip []
+(fn player-pip [side]
   "Draws the pip the player is controlling, wherever the state says it should
    be. The paths are designed such that every row is always a valid position."
+  (let [props (. state.board side)]
   (if (< 0 state.pips.player)
-    (▶ (+ 2 (- 1 triangle-width)) state.pip-row.player true)))
+    (▶ (+ 2 (- 1 triangle-width)) props.pip-row true))))
 
 (set parse-cell
   (fn [col-idx row-idx cell board]
-    (if (= :─ cell) (─ col-idx row-idx)
-        (= :- cell) (─invert col-idx row-idx)
-        (= :◀ cell) (─ col-idx row-idx)
-        (= :x cell) (─invert col-idx row-idx)
-        (= :▶ cell) (▶ col-idx row-idx)
+    (if (= :─ cell) (─ col-idx row-idx board)
+        (= :- cell) (─invert col-idx row-idx board)
+        (= :◀ cell) (─ col-idx row-idx board)
+        (= :x cell) (─invert col-idx row-idx board)
+        (= :▶ cell) (▶ col-idx row-idx board)
         (= :┤ cell) (┤ col-idx row-idx board)
         (= :├ cell) (├ col-idx row-idx board)
         (= :S cell) (S col-idx row-idx)
@@ -294,15 +295,33 @@
   "Draws the grapple board. `board` is a vec of vecs, each cell being a unicode
    character."
   (love.graphics.setLineWidth line-width)
-  (love.graphics.setColor gcol.lines)
-  (set side-colour gcol.left)
-  (set other-colour gcol.right)
-  (each [row-idx row (ipairs state.board)]
-    (each [col-idx cell (ipairs row) &until (= cell " ")]
-      (parse-cell col-idx row-idx cell state.board)))
-  (edge-column (+ offset-x x-scale))
-  (central-column)
-  (player-pip)
-  (pip-arsenal))
+  (love.graphics.setColor defs.gcol.lines)
+
+  (let [board (. state.board :left)]
+    (set side-colour (. defs.gcol :left))
+    (set other-colour (. defs.gcol :right))
+    (each [row-idx row (ipairs board.paths)]
+      (each [col-idx cell (ipairs row) &until (= cell " ")]
+        (parse-cell col-idx row-idx cell board)))
+    (player-pip :left)
+    (pip-arsenal)
+    (edge-column (+ offset-x x-scale)))
+
+  (love.graphics.push)
+  (love.graphics.translate (+ 115 (* 2 (sx defs.board.cols))) 0)
+  (love.graphics.scale -1 1)
+
+  (let [board (. state.board :right)]
+    (set side-colour (. defs.gcol :right))
+    (set other-colour (. defs.gcol :left))
+    (each [row-idx row (ipairs board.paths)]
+      (each [col-idx cell (ipairs row) &until (= cell " ")]
+        (parse-cell col-idx row-idx cell board)))
+    (player-pip :right)
+    (pip-arsenal)
+    (edge-column (+ offset-x x-scale)))
+
+  (love.graphics.pop)
+  (central-column))
 
 {: board  }

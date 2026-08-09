@@ -1,7 +1,13 @@
-{:board []
-:cell-owner [] ; 0 or 1 
-:pip-row {:player 0 :enemy 0 }
-:pips {:player 0 :enemy 0}
-:active-cells {}
-:active-pips []
-}
+{:board {:left {;; yellow
+                :paths []
+                :pip-row 0
+                :active-cells {}
+                :active-pips []}
+         :right {;; blue
+                 :paths []
+                 :pip-row 0
+                 :active-cells {}
+                 :active-pips []}}
+ :player-side :left
+ :pips {:player 0 :enemy 0}
+ :cells {:owner []}}

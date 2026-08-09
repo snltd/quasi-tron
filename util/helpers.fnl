@@ -1,5 +1,4 @@
 (local fennel (require :fennel))
-(local state (require :grapple.state))
 
 ;; Quality-of-life functions you might expect to find in a Lisp.
 
@@ -64,8 +63,8 @@
 
 ;; State things
 ; 
-(fn active? [x y]
-  (. state.active-cells (state-cell-idx x y)))
+(fn active? [x y board]
+  (. board.active-cells (state-cell-idx x y)))
 
 {: zero?
  : pos?
