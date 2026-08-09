@@ -89,7 +89,9 @@
       (tset state.active-cells state-idx ttl))
       
     (if (= :─ cell) (activate-cell (inc x) y ttl)
-        (= :◀ cell) (tset state.cell-owner y 0)
+        (= :- cell) (activate-cell (inc x) y ttl)
+        (= :◀ cell) (tset state.cell-owner y 0) ;; todo fix for sides
+        (= :x cell) (tset state.cell-owner y 1) ;; todo fix for sides
         (= :▶ cell)
           (do
             (table.insert state.active-cells state-idx math.huge)
@@ -98,8 +100,7 @@
           (do
             (activate-cell (inc x) (inc y) ttl)
             (activate-cell (inc x) (dec y) ttl))
-        (= :S cell)
-          (print "NOT IMPLEMENTED S")
+        (= :S cell) (activate-cell (inc x) y ttl)
         (= :┐ cell)
           (match (active? x (+ 2 y))
             value (activate-cell (inc x) (inc y)

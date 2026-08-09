@@ -49,6 +49,16 @@
           (love.graphics.line x-left y-px x-right y-px)))
       (love.graphics.line x-left y-px x-right y-px))))
 
+(fn ─invert [x y]
+  (let [x-left  (sx x)
+        x-right (sx (inc x))
+        y-px    (sy y)]
+    (if (active? x y)
+      (in-colour other-colour
+        (fn []
+          (love.graphics.line x-left y-px x-right y-px)))
+      (love.graphics.line x-left y-px x-right y-px))))
+
 (fn ◁ [x y]
   (let [x-apex   (sx x)
         x-base   (sx (+ x triangle-width))
@@ -269,7 +279,9 @@
 (set parse-cell
   (fn [col-idx row-idx cell board]
     (if (= :─ cell) (─ col-idx row-idx)
+        (= :- cell) (─invert col-idx row-idx)
         (= :◀ cell) (─ col-idx row-idx)
+        (= :x cell) (─invert col-idx row-idx)
         (= :▶ cell) (▶ col-idx row-idx)
         (= :┤ cell) (┤ col-idx row-idx board)
         (= :├ cell) (├ col-idx row-idx board)
