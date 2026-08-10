@@ -41,9 +41,9 @@
   (t.= 0 (h.sum [])))
 
 (fn test-active? []
-  (local state {:active-cells {[1 6] 5 [1 5] 5 [1 4] 5}})
-  (t.= nil (h.active? 1 1))
-  (t.= true (h.active? 1 6)))
+  (local board {:active-cells {106 5 105 5 104 5}})
+  (t.= nil (h.active? 1 1 board))
+  (t.= 5 (h.active? 6 1 board)))
 
 {: test-inc
  : test-dec
