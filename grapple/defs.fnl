@@ -6,11 +6,4 @@
         :lines [0 0 0]}
  :pip-ttl 5
  :firing-pip-col 3 ; where we put a pip once it's fired
- :size {:window {:width 1000 :height 750}}
- :keys {:up :p
-        :down :l
-        :left :q
-        :right :w
-        :fire "return"
-        :repeat-delay 0.20
-        :repeat-rate 0.10}}
+}

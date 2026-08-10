@@ -1,19 +1,19 @@
 {:board {:left {;; yellow
-                :paths []
+                :active-cells {}
+                :active-pips []
                 :id 0
                 :other-id 1
-                :pips 0
+                :paths []
                 :pip-row 0
-                :active-cells {}
-                :active-pips []}
+                :pips 0}
          :right {;; blue
-                 :paths []
+                 :active-cells {}
+                 :active-pips []
                  :id 1
                  :other-id 0
+                 :paths []
                  :pip-row 0
-                 :pips 0
-                 :active-cells {}
-                 :active-pips []}}
- :player-side :left
+                 :pips 0}}
+ :cells {:owner []}
  :enemy-side :right
- :cells {:owner []}}
+ :player-side :left}

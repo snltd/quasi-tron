@@ -1,6 +1,6 @@
 (local state (require :grapple.state))
 (local defs (require :grapple.defs))
-(local {: pos? : sum : inc : dec : half : pp : active? } (require :util.helpers))
+(local {:  sum : inc : dec : half : active? } (require :util.helpers))
 
 (local offset-x 100)
 (local offset-y 150)
@@ -363,4 +363,7 @@
   (side-icons)
   (central-column))
 
-{: board  }
+(fn side-select-timer [t]
+  (love.graphics.print (string.format "%.1f" (math.max 0 t)) 10 10))
+
+{: board  : side-select-timer }

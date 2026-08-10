@@ -1,8 +1,9 @@
 love.filesystem.setRequirePath("?.lua;.lib/?.lua;.lib/?/init.lua")
+
 fennel = require("fennel")
 debug.traceback = fennel.traceback
 
-local fnl_path = {"?.fnl", ".lib/?.fnl"}
+local fnl_path = {"?.fnl", "?/init.fnl", ".lib/?.fnl", ".lib/?/init.fnl"}
 
 table.insert(package.loaders, function(modname)
   local basename = modname:gsub("%.", "/")

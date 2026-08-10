@@ -61,20 +61,26 @@
   ;; Used to access state.active-cells
   (+ x (* 100 y)))
 
+(fn utf8-chars [s]
+  "Breaks a unicode string down into an array of glyphs"
+  (icollect [c (s:gmatch "[%z\001-\127\194-\244][\128-\191]*")]
+    c))
+
 ;; State things
 ; 
 (fn active? [x y board]
   (. board.active-cells (state-cell-idx x y)))
 
-{: zero?
- : pos?
+{: active?
+ : dec
+ : flatten
+ : half
+ : inc
  : nil?
  : not-nil?
+ : pos?
  : pp
- : half
- : flatten
  : state-cell-idx
- : inc
- : dec
  : sum
- : active?}
+ : utf8-chars
+ : zero?}
