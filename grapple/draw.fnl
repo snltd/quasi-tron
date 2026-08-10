@@ -4,17 +4,20 @@
 
 (local offset-x 100)
 (local offset-y 150)
-(local x-scale 28)
+(local x-scale 25)
 (local y-scale 28)
 (local triangle-height 0.4) ; actually half the height
-(local triangle-width 0.8)
-(local vertical-width 0.8)
+(local triangle-width 1)
+(local vertical-width 1)
 (local vertical-height 0.5)
 (local ellipse-width 0.5)
 (local ellipse-eccentricity 3)
 (local line-width 7)
-(local central-cell-width (* 2 x-scale)) ; pixels
+(local central-cell-width 2) ;columns (* 2 x-scale)) ; pixels
 (local edge-column-width 18)
+(local dash-length 12)
+(local gap-length 13)
+(local march-speed 30)
 
 (var side-colour nil)
 (var other-colour nil)
@@ -39,32 +42,43 @@
   (for [i (inc x) (length (. board.paths 1))]
     (parse-cell i y (. (. board.paths y) i) board)))
 
-(fn ─ [x y board]
-  (let [x-left  (sx x)
+(fn marching-line [x1 y1 x2 y2 dash gap speed]
+  (let [dx (- x2 x1)
+        dy (- y2 y1)
+        len (math.sqrt (+ (* dx dx) (* dy dy)))
+        ux (/ dx len)
+        uy (/ dy len)
+        cycle (+ dash gap)
+        phase (% (* (love.timer.getTime) speed) cycle)]
+    (var pos (- phase cycle)) ;; start slightly before 0 so pattern enters cleanly
+    (while (< pos len)
+      (let [seg-start (math.max pos 0)
+            seg-end   (math.min (+ pos dash) len)]
+        (when (< seg-start seg-end)
+          (love.graphics.line (+ x1 (* ux seg-start)) (+ y1 (* uy seg-start))
+                               (+ x1 (* ux seg-end))   (+ y1 (* uy seg-end)))))
+      (set pos (+ pos cycle)))))
+
+(fn _─ [colour x y board]
+    (let [x-left  (sx x)
         x-right (sx (inc x))
         y-px    (sy y)]
     (if (active? x y board)
-      (in-colour side-colour
-        (fn []
-          (love.graphics.line x-left y-px x-right y-px)))
-      (love.graphics.line x-left y-px x-right y-px))))
+        (in-colour colour
+          (fn []
+            (marching-line x-left y-px x-right y-px dash-length gap-length march-speed)))
+        (love.graphics.line x-left y-px x-right y-px))))
 
-(fn ─invert [x y board]
-  (let [x-left  (sx x)
-        x-right (sx (inc x))
-        y-px    (sy y)]
-    (if (active? x y board)
-      (in-colour other-colour
-        (fn []
-          (love.graphics.line x-left y-px x-right y-px)))
-      (love.graphics.line x-left y-px x-right y-px))))
+(fn ─ [x y board] (_─ side-colour x y board))
+(fn ─invert [x y board] (_─ other-colour x y board))
 
-(fn ◁ [x y]
+(fn ◁ [x y board]
   (let [x-apex   (sx x)
         x-base   (sx (+ x triangle-width))
         y-apex   (sy y)
         y-bottom (sy (+ y triangle-height))
         y-top    (sy (- y triangle-height))]
+    (─ x y board)
     (in-colour side-colour
       (fn []
         (love.graphics.polygon :fill x-apex y-apex
@@ -77,7 +91,12 @@
         y-apex   (sy y)
         y-bottom (sy (+ y triangle-height))
         y-top    (sy (- y triangle-height))]
-    (if (not omit-line-segment) (─ x y board))
+    (if (not omit-line-segment)
+      (if (= x defs.firing-pip-col)  ; so there isn't a gap from the firing pip
+        (in-colour side-colour
+          (fn [] (─ x y board)))
+        (─ x y board)
+      ))
     (in-colour side-colour
       (fn [] (love.graphics.polygon :fill x-apex y-apex
                                           x-base y-top
@@ -193,23 +212,26 @@
   ; the home line for new pips. 
   (love.graphics.line (sx 1) (sy 0)  (sx 2.5) (sy 0))))
 
-(fn central-column-stub [x y]
-  (let [x-apex   (+ 5 (sx (+ x (- 1 triangle-width))))
-        x-base   (sx (inc x))
-        y-apex-t (- (sy y) 4)
-        y-apex-b (+ 4 (sy y))
+(fn central-column-stub [x y flip]
+  (let [x-apex   (sx (if flip (inc x) x))
+        x-base   (sx (if flip      x (inc x )))
+        x-step (if flip -3 3)
+        trunc (if flip -6 6)
         y-bottom (sy (+ y triangle-height))
         y-top    (sy (- y triangle-height))]
-    (love.graphics.polygon :fill x-apex y-apex-b
-                                 x-apex y-apex-t
-                                 x-base y-top
-                                 x-base y-bottom)))
+    (love.graphics.push)
+    (love.graphics.setLineWidth 2)
+    (var y-step -6)
+    (for [x (+ trunc x-apex) x-base x-step]
+      (set y-step (+ 1 y-step))
+      (love.graphics.line x (+ y-bottom y-step) x (- y-top y-step)))
+    (love.graphics.pop)))
 
 (fn central-cell [x y]
-  (central-column-stub x y)
-  (gwrap (fn [] (love.graphics.scale -1 1) (central-column-stub -23.2 y)))
-  (let [left   (sx (inc x))
-        right  (+ left central-cell-width)
+  (central-column-stub (dec x) y false)
+  (central-column-stub (+ central-cell-width x) y true)
+  (let [left   (sx x)
+        right  (sx (+ x central-cell-width))
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
         colour (if (= 0 (. state.cells.owner y)) defs.gcol.left defs.gcol.right)]
@@ -239,8 +261,8 @@
 (fn who-is-winning-square [central-offset]
   "Draws the big square at the top of the cell column which shows the current
    state of the game."
-  (let [left   (sx (inc central-offset))
-        right  (+ left central-cell-width)
+  (let [left   (sx central-offset)
+        right  (sx (+ central-offset central-cell-width))
         bottom (+ offset-y (half y-scale))
         top    (- bottom (* 1.8 y-scale))
         colour (who-is-winning?)
@@ -259,23 +281,23 @@
 
 (fn central-column []
   "Draws the column of cells the players compete to control"
-  (let [central-offset defs.board.cols]
-  (who-is-winning-square central-offset)
-  (for [row-idx 1 defs.board.rows]
-    (central-cell central-offset row-idx))))
+  (let [central-offset (+ 1 defs.board.cols)]
+    (who-is-winning-square central-offset)
+    (for [row-idx 1 defs.board.rows]
+      (central-cell central-offset row-idx))))
 
-(fn pip-arsenal []
-  "Draws the column of pips the player has in reserve"
+(fn pip-arsenal [board]
+  "Draws the column of pips the player or enemy has in reserve"
   (let [left-offset -2]
-    (for [i 1 state.pips.player]
+    (for [i 1 board.pips]
       (▶ left-offset i true))))
 
 (fn player-pip [side]
   "Draws the pip the player is controlling, wherever the state says it should
    be. The paths are designed such that every row is always a valid position."
-  (let [props (. state.board side)]
-  (if (< 0 state.pips.player)
-    (▶ (+ 2 (- 1 triangle-width)) props.pip-row true))))
+  (let [board (. state.board side)]
+  (if (< 0 board.pips)
+    (▶ (+ 2 (- 1 triangle-width)) board.pip-row true))))
 
 (set parse-cell
   (fn [col-idx row-idx cell board]
@@ -283,17 +305,33 @@
         (= :- cell) (─invert col-idx row-idx board)
         (= :◀ cell) (─ col-idx row-idx board)
         (= :x cell) (─invert col-idx row-idx board)
-        (= :▶ cell) (▶ col-idx row-idx board)
+        (= :▶ cell) (▶ col-idx row-idx false board)
         (= :┤ cell) (┤ col-idx row-idx board)
         (= :├ cell) (├ col-idx row-idx board)
         (= :S cell) (S col-idx row-idx)
         (= :┐ cell) (┐ col-idx row-idx board)
         (= :┘ cell) (┘ col-idx row-idx)
-        (= :◁ cell) (◁ col-idx row-idx))))
+        (= :◁ cell) (◁ col-idx row-idx board))))
+
+(fn side-icon [x y]
+  (love.graphics.circle :line x y 20))
+  
+(fn side-icons []
+  (let [left-x (sx 0)
+        player-col [100 100 100]
+        enemy-col [0 0 0]
+        right-x (sx (+ 4 (* 2 defs.board.cols)))
+        y (sy -3)]
+    (if (= state.player-side :left)
+      (do
+        (in-colour player-col (fn [] (side-icon left-x y)))
+        (in-colour enemy-col (fn [] (side-icon right-x y))))
+      (do
+        (in-colour enemy-col (fn [] (side-icon left-x y)))
+        (in-colour player-col (fn [] (side-icon right-x y)))))))
 
 (fn board []
-  "Draws the grapple board. `board` is a vec of vecs, each cell being a unicode
-   character."
+  "Draws the grapple board and its trimmings"
   (love.graphics.setLineWidth line-width)
   (love.graphics.setColor defs.gcol.lines)
 
@@ -303,12 +341,12 @@
     (each [row-idx row (ipairs board.paths)]
       (each [col-idx cell (ipairs row) &until (= cell " ")]
         (parse-cell col-idx row-idx cell board)))
+    (edge-column (+ offset-x x-scale))
     (player-pip :left)
-    (pip-arsenal)
-    (edge-column (+ offset-x x-scale)))
+    (pip-arsenal board))
 
   (love.graphics.push)
-  (love.graphics.translate (+ 115 (* 2 (sx defs.board.cols))) 0)
+  (love.graphics.translate (+ offset-x (* 2 (sx defs.board.cols))) 0)
   (love.graphics.scale -1 1)
 
   (let [board (. state.board :right)]
@@ -317,11 +355,12 @@
     (each [row-idx row (ipairs board.paths)]
       (each [col-idx cell (ipairs row) &until (= cell " ")]
         (parse-cell col-idx row-idx cell board)))
+    (edge-column (+ offset-x x-scale))
     (player-pip :right)
-    (pip-arsenal)
-    (edge-column (+ offset-x x-scale)))
+    (pip-arsenal board))
 
   (love.graphics.pop)
+  (side-icons)
   (central-column))
 
 {: board  }
