@@ -1,5 +1,6 @@
 (local state (require :grapple.state))
 (local defs (require :grapple.defs))
+(local chooser (require :grapple.chooser))
 (local {:  sum : inc : dec : half : active? } (require :util.helpers))
 
 (local offset-x 100)
@@ -361,9 +362,9 @@
 
   (love.graphics.pop)
   (side-icons)
-  (central-column))
+  (central-column)
 
-(fn side-select-timer [t]
-  (love.graphics.print (string.format "%.1f" (math.max 0 t)) 10 10))
+  (if (= state.phase :chooser)
+    (chooser.draw.timer (sx 0) (sy (+ 3 defs.board.rows)))))
 
-{: board  : side-select-timer }
+{: board }

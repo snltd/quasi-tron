@@ -1,1 +1,1 @@
-{:phase :select-side :key-timer 0 :key-held 25 }
+{:phase :intro :key-timer 0 :key-held 25 }

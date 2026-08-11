@@ -23,10 +23,15 @@
   "Alternate colours for the initial state of the central column"
   (fcollect [i 1 board-rows] (% i 2)))
 
-(fn load []
+(fn launch [params]
   (love.graphics.setBackgroundColor (unpack defs.gcol.background))
+  (set state.phase :chooser)
+  (set state.board.left.pips params.player-pips)
+  (set state.board.right.pips params.enemy-pips)
+  (set state.player-side :left)
+  (set state.enemy-side :right)
   (set state.cells.owner (cell-owners defs.board.rows))
   (set state.board.left.paths (board defs.board.rows))
   (set state.board.right.paths (board defs.board.rows)))
 
-{: load : board : cell-owners}
+{: launch : board : cell-owners}

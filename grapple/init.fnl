@@ -1,8 +1,11 @@
-; (local { : paths } (require :grapple.paths))
-; (local {: flatten} (require :util.helpers))
 (local actions (require :grapple.actions))
 (local draw (require :grapple.draw))
-(local load (require :grapple.load))
+(local keypress (require :grapple.keypress))
+(local setup (require :grapple.setup))
 (local update (require :grapple.update))
 
-{:load load.load :draw draw.board :update update.update :fire actions.fire}
+{:launch setup.launch
+ :draw draw.board
+ :update update.update
+ :fire actions.fire
+ :keypress keypress.handler}

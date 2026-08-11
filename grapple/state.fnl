@@ -16,4 +16,5 @@
                  :pips 0}}
  :cells {:owner []}
  :enemy-side :right
+ :phase :chooser
  :player-side :left}
