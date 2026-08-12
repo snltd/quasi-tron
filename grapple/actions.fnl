@@ -11,8 +11,8 @@
         (tset board.active-cells state-idx ttl))
     (if (= :─ cell) (activate-cell board (inc x) y ttl)
         (= :- cell) (activate-cell board (inc x) y ttl)
-        (= :◀ cell) (tset state.cells.owner y board.id)
-        (= :x cell) (tset state.cells.owner y board.other-id)
+        (= :◀ cell) (tset state.boxes y :owner board.id)
+        (= :x cell) (tset state.boxes y :owner board.other-id)
         (= :▶ cell)
           (do
             (table.insert board.active-cells state-idx math.huge)

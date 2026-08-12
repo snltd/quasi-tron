@@ -14,7 +14,7 @@
                  :paths []
                  :pip-row 0
                  :pips 0}}
- :cells {:owner []}
+ :boxes []
  :enemy-side :right
  :phase :chooser
  :player-side :left}

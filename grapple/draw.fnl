@@ -235,7 +235,7 @@
         right  (sx (+ x central-cell-width))
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
-        colour (if (= 0 (. state.cells.owner y)) defs.gcol.left defs.gcol.right)]
+        colour (if (= 0 (. (. state.boxes y) :owner)) defs.gcol.left defs.gcol.right)]
     (in-colour colour
       (fn []
       (love.graphics.polygon :fill left top
@@ -253,7 +253,7 @@
 (fn who-is-winning? []
   "Returns the colour for the who-is-winning square"
   (let [tie-score   (half defs.board.rows)
-        right-score (sum state.cells.owner)]
+        right-score (sum (icollect [_ b (pairs state.boxes)] b.owner))]
       (if (< right-score tie-score) defs.gcol.left
           (> right-score tie-score) defs.gcol.right
           ;; we'll need some flashing thing here at some point
@@ -281,7 +281,7 @@
 ))
 
 (fn central-column []
-  "Draws the column of cells the players compete to control"
+  "Draws the column of boxes the players compete to control"
   (let [central-offset (+ 1 defs.board.cols)]
     (who-is-winning-square central-offset)
     (for [row-idx 1 defs.board.rows]
