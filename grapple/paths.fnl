@@ -1,5 +1,7 @@
 ;; All path traversal logic is done left-to-right. Increasing index means
 ;; "away from start, towards centre", rather than a straight x co-ordinate.
+;; The row number increases as we move down.
+;; The paths are inverted for the right hand side of the board.
 ;;
 ;; Don't reformat this. Nothing will break, but it gets hard to read.
 ;;
@@ -8,13 +10,17 @@
 ;; If you want something to be more likely to be picked, duplicate it.
 ;; 
 ;; Key
-;; ◀ -- connects to cell
-;; ◁ -- end of path
+;; ─ -- normal path
+;; ◀ -- connects a normal path to a box
+;; ◁ -- dead end
 ;; ▶ -- infinite repeater
-;; S -- colour switcher
-;; - -- opposite colour path
-; 
-{:paths [
+;; S -- inverter
+;; - -- inverted  path
+;; x -- connects an inverted path to a box
+ 
+;; fnlfmt: skip
+{:paths
+[
   ["───────────◀"]
   ["───────────◀"]
   ["───────────◀"]
@@ -53,6 +59,7 @@
   ["─────◁ ┌───◀"
    "───────┤    "
    "─────◁ └─◁ "]
+
   ["─────◁ ┌───◀"
    "───────┤    "
    "─────◁ └───◀"]

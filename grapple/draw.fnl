@@ -235,7 +235,10 @@
         right  (sx (+ x central-cell-width))
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
-        colour (if (= 0 (. (. state.boxes y) :owner)) defs.gcol.left defs.gcol.right)]
+        owner  (. state.box-owners y)
+        colour (if (= 0 owner) [90 80 70]
+                   (= -1 owner) defs.gcol.left
+                   (= 1 owner) defs.gcol.right)]
     (in-colour colour
       (fn []
       (love.graphics.polygon :fill left top
@@ -252,10 +255,9 @@
 
 (fn who-is-winning? []
   "Returns the colour for the who-is-winning square"
-  (let [tie-score   (half defs.board.rows)
-        right-score (sum (icollect [_ b (pairs state.boxes)] b.owner))]
-      (if (< right-score tie-score) defs.gcol.left
-          (> right-score tie-score) defs.gcol.right
+  (let [score (sum state.box-owners)]
+      (if (< score 0) defs.gcol.left
+          (< 0 score) defs.gcol.right
           ;; we'll need some flashing thing here at some point
           [0 0 0]))) 
         
@@ -266,8 +268,7 @@
         right  (sx (+ central-offset central-cell-width))
         bottom (+ offset-y (half y-scale))
         top    (- bottom (* 1.8 y-scale))
-        colour (who-is-winning?)
-        ]
+        colour (who-is-winning?)]
       (in-colour colour
         (fn []
           (love.graphics.polygon :fill left top
@@ -333,6 +334,7 @@
 
 (fn board []
   "Draws the grapple board and its trimmings"
+  (love.graphics.setBackgroundColor (unpack defs.gcol.background))
   (love.graphics.setLineWidth line-width)
   (love.graphics.setColor defs.gcol.lines)
 

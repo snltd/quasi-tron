@@ -22,8 +22,7 @@
         (tset (. board.paths pip.row) defs.firing-pip-col "─")
         (table.remove board.active-pips i))))
   ;; player 
-  (if (= state.phase :chooser)
-      (chooser.update dt)
+  (if (= state.phase :grapple)
       (do
         (set global-state.key-timer (- global-state.key-timer dt))
         (let [held (or (love.keyboard.isDown keys.up)
@@ -32,14 +31,17 @@
           (if held
               (when (or (not global-state.key-held)
                         (<= global-state.key-timer 0))
-                (if (love.keyboard.isDown keys.down) (action.pip-up board)
-                    (love.keyboard.isDown keys.up) (action.pip-down board))
+                (if (love.keyboard.isDown keys.down) (action.pip-down board)
+                    (love.keyboard.isDown keys.up) (action.pip-up board))
                 (set global-state.key-timer
                      (if global-state.key-held keys.repeat-rate
                          keys.repeat-delay))
                 (set global-state.key-held true))
               (set global-state.key-held false)))
         ;; enemy
-        (enemy.move dt))))
+        (action.update-boxes state.board)
+        (enemy.move dt)))
+  ;; state.phase is chooser
+  (chooser.update dt))
 
 {: update}
