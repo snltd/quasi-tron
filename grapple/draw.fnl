@@ -1,7 +1,7 @@
 (local state (require :grapple.state))
 (local defs (require :grapple.defs))
 (local chooser (require :grapple.chooser))
-(local {:  sum : inc : dec : half : active? } (require :util.helpers))
+(local {: pp :  sum : inc : dec : half : active? } (require :util.helpers))
 
 (local offset-x 100)
 (local offset-y 150)
@@ -14,7 +14,7 @@
 (local ellipse-width 0.5)
 (local ellipse-eccentricity 3)
 (local line-width 7)
-(local central-cell-width 2) ;columns (* 2 x-scale)) ; pixels
+(local box-width 2) ;columns (* 2 x-scale)) ; pixels
 (local edge-column-width 18)
 (local dash-length 12)
 (local gap-length 13)
@@ -228,17 +228,21 @@
       (love.graphics.line x (+ y-bottom y-step) x (- y-top y-step)))
     (love.graphics.pop)))
 
-(fn central-cell [x y]
+(fn flicker []
+  (if (< 0.5 (math.random)) defs.gcol.left defs.gcol.right))
+
+(fn box [x y]
   (central-column-stub (dec x) y false)
-  (central-column-stub (+ central-cell-width x) y true)
+  (central-column-stub (+ box-width x) y true)
   (let [left   (sx x)
-        right  (sx (+ x central-cell-width))
+        right  (sx (+ x box-width))
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
         owner  (. state.box-owners y)
-        colour (if (= 0 owner) [90 80 70]
+        colour (if (= 0 owner) (flicker)
                    (= -1 owner) defs.gcol.left
                    (= 1 owner) defs.gcol.right)]
+
     (in-colour colour
       (fn []
       (love.graphics.polygon :fill left top
@@ -265,7 +269,7 @@
   "Draws the big square at the top of the cell column which shows the current
    state of the game."
   (let [left   (sx central-offset)
-        right  (sx (+ central-offset central-cell-width))
+        right  (sx (+ central-offset box-width))
         bottom (+ offset-y (half y-scale))
         top    (- bottom (* 1.8 y-scale))
         colour (who-is-winning?)]
@@ -286,7 +290,7 @@
   (let [central-offset (+ 1 defs.board.cols)]
     (who-is-winning-square central-offset)
     (for [row-idx 1 defs.board.rows]
-      (central-cell central-offset row-idx))))
+      (box central-offset row-idx))))
 
 (fn pip-arsenal [board]
   "Draws the column of pips the player or enemy has in reserve"

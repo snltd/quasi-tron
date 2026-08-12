@@ -9,6 +9,11 @@
 (local {: nil?} (require :util.helpers))
 (import-macros {: dec!} :util.macros)
 
+(fn timer [dt]
+  (if (< 0 state.time-left)
+      (set state.time-left (- state.time-left dt))
+      (set state.phase :grapple)))
+
 (fn update [dt]
   (each [_side board (pairs state.board)]
     (each [idx ttl (pairs board.active-cells)]
@@ -21,6 +26,7 @@
       (when (not (pos? pip.ttl))
         (tset (. board.paths pip.row) defs.firing-pip-col "─")
         (table.remove board.active-pips i))))
+  (timer dt)
   ;; player 
   (if (= state.phase :grapple)
       (do
@@ -31,15 +37,18 @@
           (if held
               (when (or (not global-state.key-held)
                         (<= global-state.key-timer 0))
-                (if (love.keyboard.isDown keys.down) (action.pip-down board)
-                    (love.keyboard.isDown keys.up) (action.pip-up board))
+                (if (love.keyboard.isDown keys.down)
+                    (action.pip-down! board defs.board.rows)
+                    (love.keyboard.isDown keys.up)
+                    (action.pip-up! board defs.board.rows))
                 (set global-state.key-timer
                      (if global-state.key-held keys.repeat-rate
                          keys.repeat-delay))
                 (set global-state.key-held true))
               (set global-state.key-held false)))
+        (set state.box-owners
+             (action.update-boxes state.box-owners state.board))
         ;; enemy
-        (action.update-boxes state.board)
         (enemy.move dt)))
   ;; state.phase is chooser
   (chooser.update dt))

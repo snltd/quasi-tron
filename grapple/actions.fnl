@@ -1,7 +1,5 @@
 (local defs (require :grapple.defs))
-
-(local state (require :grapple.state))
-(local {: pp : active? : dec : inc : nil? : pos? : state-cell-idx}
+(local {: active? : dec : inc : nil? : pos? : state-cell-idx}
        (require :util.helpers))
 
 (import-macros {: dec! : inc!} :util.macros)
@@ -24,15 +22,20 @@
   (let [input-sum (+ incoming-l incoming-r)]
     (if (and (= 0 incoming-l) (= 0 incoming-r)) nil
         (= -2 input-sum) -1
-        (= 2 input-sum) -2
+        (= 2 input-sum) 1
         input-sum)))
 
-(fn update-boxes [board]
-  (for [row 1 (length board.left)]
-    (let [current-state (. state.box-owners row)
-          new-state (update-box (incoming board.left row) (incoming board.right row))]
-      (if (and new-state (not= current-state new-state))
-          (tset state.box-owners row new-state)))))
+(fn update-boxes [box-owners board]
+  "Returns a new list of box owners"
+  (local ret [])
+  (for [row 1 (length board.left.paths)]
+    (let [current-owner (. box-owners row)
+          new-owner (update-box (incoming board.left row)
+                                (incoming board.right row))]
+      (if (and new-owner (not= current-owner new-owner))
+          (table.insert ret new-owner)
+          (table.insert ret current-owner))))
+  ret)
 
 ;; fnlfmt: skip
 (fn activate-cell [board x y ttl]
@@ -60,7 +63,7 @@
             value (activate-cell board (inc x) (dec y)
                                  (if (= value math.huge) ttl value))))))
 
-(fn fire [board-side]
+(fn fire! [board-side]
   (when (and (pos? board-side.pips) (pos? board-side.pip-row))
     (let [adjacent (. (. board-side.paths board-side.pip-row) 3)]
       (when (and (pos? board-side.pip-row) (not= adjacent "◁")
@@ -73,14 +76,14 @@
                        defs.pip-ttl)
         (set board-side.pip-row 0)))))
 
-(fn pip-up [board rows]
+(fn pip-up! [board rows]
   (if (< 1 board.pip-row)
       (dec! board.pip-row)
       (set board.pip-row rows)))
 
-(fn pip-down [board rows]
+(fn pip-down! [board rows]
   (if (< board.pip-row rows)
       (inc! board.pip-row)
       (set board.pip-row 1)))
 
-{: fire : pip-down : pip-up : update-boxes : incoming : update-box}
+{: fire! : pip-down! : pip-up! : update-boxes : incoming : update-box}

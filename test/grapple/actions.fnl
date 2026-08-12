@@ -3,6 +3,17 @@
 (local s (require :grapple.actions))
 
 (local active-line {104 5 105 5 106 5 107 5 108 5 109 5 110 5 111 5 112 5})
+;; left has -1, right has 1
+(local sample-boxes [-1 1])
+
+; blue on top, yellow underneath
+(local straight-paths
+       [(h.utf8-chars "───────────◀")
+        (h.utf8-chars "───────────◀")])
+
+(local inverter-paths ;; left has -1, right has 1
+       [(h.utf8-chars "───────S---x")
+        (h.utf8-chars "───────S---x")])
 
 (fn deep-clone [t]
   "helper function for tests"
@@ -14,31 +25,46 @@
       t))
 
 (fn test-update-boxes-no-inputs []
-  (local state {:box-owners [1 -1]})
-  (local board {:left {:paths [(h.utf8-chars "───────────◀")]
-                       :active-cells {}}
-                :right {:paths [(h.utf8-chars "───────────◀")]
-                        :active-cells {}}})
-  (s.update-boxes board)
-  (t.= [1 -1] state.box-owners))
+  (local board
+         {:left {:paths straight-paths :id -1 :active-cells {}}
+          :right {:paths straight-paths :id 1 :active-cells {}}})
+  (t.= sample-boxes (s.update-boxes sample-boxes board)))
 
-; (fn test-update-boxes-both-shoot-own-colour []
-;   (local state {:box-owners [1 -1]})
-;   (local board {:left {:paths [(h.utf8-chars "───────────◀")]
-;                        :active-cells {112 5}}
-;                 :right {:paths [(h.utf8-chars "───────────◀")]
-;                         :active-cells {212 5}}})
-;   (s.update-boxes board)
-;   (t.= [1 -1] state.box-owners))
+(fn test-update-boxes-both-shoot-own-colour []
+  (local board
+         {:left {:paths straight-paths :id -1 :active-cells {112 5}}
+          :right {:paths straight-paths :id 1 :active-cells {212 5}}})
+  (t.= sample-boxes (s.update-boxes sample-boxes board)))
 
-(fn test-update-boxes-left-shoots-other-colour []
-  (local state {:box-owners [1 -1]})
-  (local board {:left {:paths [(h.utf8-chars "───────────◀")]
-                       :active-cells {112 5}}
-                :right {:paths [(h.utf8-chars "───────────◀")]
-                        :active-cells {}}})
-  (s.update-boxes board)
-  (t.= [-1 -1] state.box-owners))
+(fn test-update-boxes-both-shoot-other-colour []
+  (local board
+         {:left {:paths straight-paths :id -1 :active-cells {212 5}}
+          :right {:paths straight-paths :id 1 :active-cells {112 5}}})
+  (t.= [1 -1] (s.update-boxes sample-boxes board)))
+
+(fn test-update-boxes-both-shoot-same-box []
+  (local board
+         {:left {:paths straight-paths :id -1 :active-cells {112 5}}
+          :right {:paths straight-paths :id 1 :active-cells {112 5}}})
+  (t.= [0 1] (s.update-boxes sample-boxes board)))
+
+(fn test-update-boxes-left-through-inverters []
+  (local board
+         {:left {:paths inverter-paths :id -1 :active-cells {112 5 212 5}}
+          :right {:paths straight-paths :id 1 :active-cells {}}})
+  (t.= [1 1] (s.update-boxes sample-boxes board)))
+
+(fn test-update-boxes-both-sending-same-signal []
+  (local board
+         {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
+          :right {:paths straight-paths :id 1 :active-cells {112 5}}})
+  (t.= [1 1] (s.update-boxes sample-boxes board)))
+
+(fn test-update-boxes-both-sending-inverted-signal []
+  (local board
+         {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
+          :right {:paths inverter-paths :id 1 :active-cells {112 5}}})
+  (t.= [0 1] (s.update-boxes sample-boxes board)))
 
 (fn test-update-box []
   (t.= nil (s.update-box 0 0))
@@ -88,6 +114,7 @@
             :active-cells []
             :active-pips []})
   (local expected (deep-clone b))
+  (s.fire! b)
   (t.= expected b))
 
 (fn test-fire-in-row-0-does-nothing []
@@ -97,6 +124,7 @@
             :active-cells []
             :active-pips []})
   (local expected (deep-clone b))
+  (s.fire! b)
   (t.= expected b))
 
 (fn test-fire-straight-path []
@@ -105,7 +133,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (s.fire b)
+  (s.fire! b)
   (t.= {:active-cells active-line
         :active-pips [{:owner 0 :row 1 :ttl 5}]
         :paths [(h.utf8-chars "──▶────────◀")]
@@ -119,7 +147,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (s.fire b)
+  (s.fire! b)
   (t.= {:active-cells {104 5 105 5 106 5 107 .inf 108 .inf 109 .inf 110 .inf 111 .inf 112 .inf}
         :active-pips [{:owner 0 :row 1 :ttl 5}]
         :paths [(h.utf8-chars "──▶───▶────◀")]
@@ -132,7 +160,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (s.fire b)
+  (s.fire! b)
   (t.= {:active-cells {104 5 105 5 106 5 107 5 108 5 109 5 110 5 111 5 112 5}
         :active-pips [{:owner 0 :row 1 :ttl 5}]
         :paths [(h.utf8-chars "──▶───S----x")]
@@ -148,7 +176,7 @@
             :active-cells []
             :active-pips []})
   (local expected (deep-clone b))
-  (s.fire b)
+  (s.fire! b)
   (t.= expected b))
 
 ;; fnlfmt: skip
@@ -160,7 +188,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (s.fire b)
+  (s.fire! b)
   (t.= {:active-cells {109 5 110 5 111 5 112 5
                        204 5 205 5 206 5 207 5 208 5
                        309 5 310 .inf 311 .inf 312 .inf}
@@ -181,7 +209,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (s.fire b)
+  (s.fire! b)
   (t.= {:active-cells {104 5 105 5}
         :active-pips [{:owner 0 :row 1 :ttl 5}]
         :paths [["─" "─" "▶" "─" "┐" " " " " " " " " " " " " " "]
@@ -189,10 +217,10 @@
                 ["─" "─" "─" "─" "┘" " " " " " " " " " " " " " "]]
         :pip-row 0
         :pips 2} b)
-  (s.pip-down b 3) ; row 1: pip starts on row 0, wherever it was before
-  (s.pip-down b 3) ; row 2
-  (s.pip-down b 3) ; row 3
-  (s.fire b)
+  (s.pip-down! b 3) ; row 1: pip starts on row 0, wherever it was before
+  (s.pip-down! b 3) ; row 2
+  (s.pip-down! b 3) ; row 3
+  (s.fire! b)
   (t.= {:active-cells {104 5 105 5
                        206 5 207 5 208 5 209 5 210 5 211 5 212 5
                        304 5 305 5}
@@ -205,22 +233,22 @@
 
 (fn test-pip-up-top []
   (local board {:pip-row 0})
-  (s.pip-up board 12)
+  (s.pip-up! board 12)
   (t.= 12 board.pip-row))
 
 (fn test-pip-up-middle []
   (local board {:pip-row 5})
-  (s.pip-up board 12)
+  (s.pip-up! board 12)
   (t.= 4 board.pip-row))
 
 (fn test-pip-down-bottom []
   (local board {:pip-row 12})
-  (s.pip-down board 12)
+  (s.pip-down! board 12)
   (t.= 1 board.pip-row))
 
 (fn test-pip-down-middle []
   (local board {:pip-row 5})
-  (s.pip-down board 12)
+  (s.pip-down! board 12)
   (t.= 6 board.pip-row))
 
 {: test-pip-up-middle
@@ -230,7 +258,12 @@
  : test-incoming
  : test-update-box
  : test-update-boxes-no-inputs
- : test-update-boxes-left-shoots-other-colour
+ : test-update-boxes-both-shoot-own-colour
+ : test-update-boxes-both-shoot-other-colour
+ : test-update-boxes-both-shoot-same-box
+ : test-update-boxes-left-through-inverters
+ : test-update-boxes-both-sending-same-signal
+ : test-update-boxes-both-sending-inverted-signal
  : test-fire-empty-ammo-does-nothing
  : test-fire-in-row-0-does-nothing
  : test-fire-next-to-<
