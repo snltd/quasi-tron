@@ -6,4 +6,6 @@
         :lines [0 0 0]}
  :pip-ttl 5
  :firing-pip-col 3 ; where we put a pip once it's fired
+ :deadlock-timer 4
+ :grapple-time 20
 }

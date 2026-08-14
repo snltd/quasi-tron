@@ -1,3 +1,4 @@
+;; anything nil is set by setup.launch, from defs
 {:board {:left {;; yellow
                 :active-cells {}
                 :active-pips []
@@ -15,8 +16,9 @@
                  :pip-row 0
                  :pips 0}}
  :box-owners [] ; the ID of the owner
- :enemy-side :right
- :enemy-move-timer 0
+ :deadlock-timer nil ; seconds
+ :enemy-side nil
+ :enemy-move-timer nil
  :enemy-skills {
     ;; all probs are from 0 to 1
     :fire-prob 0.3; 0 never fires, 1 fires every cycle
@@ -26,5 +28,5 @@
     :speed 0.08 ; interval between moves, in s. player is 0.1
   }
  :phase :chooser
- :player-side :left
- :time-left 20}
+ :player-side nil
+ :time-left nil}

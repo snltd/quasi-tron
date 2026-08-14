@@ -4,17 +4,33 @@
 (local defs (require :grapple.defs))
 (local enemy (require :grapple.enemy))
 (local state (require :grapple.state))
+(local {: set-phase!} (require :util.actions))
 (local {: pos?} (require :util.helpers))
 (local {: keys} (require :global-defs))
-(local {: nil?} (require :util.helpers))
+(local {: nil? : sum} (require :util.helpers))
 (import-macros {: dec!} :util.macros)
 
-(fn update-timer [dt]
+(fn end-grapple-phase []
+  (each [_side board (pairs state.board)]
+    (each [idx ttl (pairs board.active-cells)]
+      (tset board.active-cells idx (- ttl 10000))))
+  (set state.time-left 0)
+  (let [score (sum state.box-owners)]
+    (if (= 0 score) (set state.phase :deadlock)
+        (or (and (< score 0) (= state.enemy-side :right))
+            (and (< 0 score) (= state.enemy-side :left)))
+        (set-phase! :select-components (math.abs score))
+        (set-phase! :main-game {:injured true}))))
+
+(fn update-deadlock-timer [dt]
+  (dec! state.deadlock-timer dt)
+  (if (<= state.deadlock-timer 0)
+      (set-phase! :grapple {:player-pips 3 :enemy-pips 1})))
+
+(fn update-grapple-timer [dt]
   (let [new-time (- state.time-left dt)]
     (if (< new-time 0)
-        (do
-          (set state.time-left 0)
-          (set state.phase :adjudicate))
+        (end-grapple-phase)
         (set state.time-left new-time))))
 
 (fn update-board! [dt]
@@ -22,8 +38,8 @@
     (each [idx ttl (pairs board.active-cells)]
       (local new-ttl (- ttl dt))
       (tset board.active-cells idx new-ttl)
-      (when (< new-ttl 0)
-        (tset board.active-cells idx nil)))
+      (if (< new-ttl 0)
+          (tset board.active-cells idx nil)))
     (each [i pip (ipairs board.active-pips)]
       (dec! pip.ttl dt)
       (when (not (pos? pip.ttl))
@@ -49,16 +65,16 @@
           (set global-state.key-held true))
         (set global-state.key-held false))))
 
+(fn grapple-update [dt]
+  (grapple-key-handler dt)
+  (update-boxes!)
+  (enemy.move (. state.board state.enemy-side) state.enemy-skills dt))
+
 (fn update [dt]
   (update-board! dt)
-  (update-timer dt)
-  ;; player 
-  (if (= state.phase :grapple)
-      (do
-        (grapple-key-handler dt)
-        (update-boxes!)
-        (enemy.move (. state.board state.enemy-side) state.enemy-skills dt))
-      (= state.phase :chooser)
-      (chooser.update dt)))
+  (update-grapple-timer dt)
+  (if (= state.phase :grapple) (grapple-update dt)
+      (= state.phase :chooser) (chooser.update dt)
+      (= state.phase :deadlock) (update-deadlock-timer dt)))
 
 {: update}

@@ -2,15 +2,14 @@
 (local global-state (require :global-state))
 (local grapple (require :grapple))
 (local {: half} (require :util.helpers))
+(local fonts (require :util.fonts))
 (local intro (require :intro.draw))
-
-(var display-font nil)
 
 (fn love.load []
   (math.randomseed (os.time))
   (love.window.setTitle :QuasiTron)
-  (set display-font (love.graphics.newFont :assets/MatrixType-Regular.ttf 32))
-  (love.graphics.setFont display-font)
+  (fonts.setup)
+  (love.graphics.setFont fonts.display-font)
   (love.window.setMode global-defs.size.window.width
                        global-defs.size.window.height {:resizable true}))
 

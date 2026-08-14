@@ -1,9 +1,10 @@
-(local grapple (require :grapple))
 (local global-state (require :global-state))
+(local registry (require :util.phase-registry))
 
 (fn set-phase! [phase params]
-  (print "setting phase to " phase)
   (set global-state.phase phase)
-  (if (= phase :grapple) (grapple.launch params)))
+  (let [phase-module (registry.get phase)]
+    (when (and phase-module phase-module.launch)
+      (phase-module.launch params))))
 
 {: set-phase!}
