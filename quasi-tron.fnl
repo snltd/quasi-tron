@@ -9,7 +9,7 @@
 (fn love.load []
   (math.randomseed (os.time))
   (love.window.setTitle :QuasiTron)
-  (set display-font (love.graphics.newFont :assets/Orbitron-Bold.ttf 32))
+  (set display-font (love.graphics.newFont :assets/MatrixType-Regular.ttf 32))
   (love.graphics.setFont display-font)
   (love.window.setMode global-defs.size.window.width
                        global-defs.size.window.height {:resizable true}))
