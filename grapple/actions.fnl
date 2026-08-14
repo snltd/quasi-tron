@@ -21,6 +21,7 @@
    nil if there are no inputs"
   (let [input-sum (+ incoming-l incoming-r)]
     (if (and (= 0 incoming-l) (= 0 incoming-r)) nil
+        (= 0 input-sum) (if (< 0.5 (math.random)) 1 -1)
         (= -2 input-sum) -1
         (= 2 input-sum) 1
         input-sum)))

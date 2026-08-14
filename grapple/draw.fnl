@@ -228,9 +228,6 @@
       (love.graphics.line x (+ y-bottom y-step) x (- y-top y-step)))
     (love.graphics.pop)))
 
-(fn flicker []
-  (if (< 0.5 (math.random)) defs.gcol.left defs.gcol.right))
-
 (fn box [x y]
   (central-column-stub (dec x) y false)
   (central-column-stub (+ box-width x) y true)
@@ -239,8 +236,7 @@
         top    (- (sy y) (half y-scale))
         bottom (+ top y-scale)
         owner  (. state.box-owners y)
-        colour (if (= 0 owner) (flicker)
-                   (= -1 owner) defs.gcol.left
+        colour (if (= -1 owner) defs.gcol.left
                    (= 1 owner) defs.gcol.right)]
 
     (in-colour colour
@@ -336,6 +332,9 @@
         (in-colour enemy-col (fn [] (side-icon left-x y)))
         (in-colour player-col (fn [] (side-icon right-x y)))))))
 
+(fn timer [x y]
+  (love.graphics.print (string.format "       %.03f" state.time-left) x y))
+
 (fn board []
   "Draws the grapple board and its trimmings"
   (love.graphics.setBackgroundColor (unpack defs.gcol.background))
@@ -371,6 +370,7 @@
   (central-column)
 
   (if (= state.phase :chooser)
-    (chooser.draw.timer (sx 0) (sy (+ 3 defs.board.rows)))))
+    (chooser.draw.timer (sx 0) (sy (+ 3 defs.board.rows)))
+    (timer (sx 0) (sy (+ 3 defs.board.rows)))))
 
 {: board }

@@ -14,7 +14,8 @@
                  :paths []
                  :pip-row 0
                  :pips 0}}
- :box-owners [] ; the ID of the owner, 0 if both have a claim
+ :box-owners [] ; the ID of the owner
  :enemy-side :right
  :phase :chooser
- :player-side :left}
+ :player-side :left
+ :time-left 20}
