@@ -1,6 +1,6 @@
-## Quasi-Tron
+## Quasitron
 
-[![Unit Tests](https://github.com/snltd/quasi-tron/actions/workflows/test.yml/badge.svg)](https://github.com/snltd/quasitron/actions/workflows/test.yml)
+[![Unit Tests](https://github.com/snltd/quasitron/actions/workflows/test.yml/badge.svg)](https://github.com/snltd/quasitron/actions/workflows/test.yml)
 
 In which I attempt to kind-of implement some interpretation of
 [Quazatron](https://torinak.com/qaop/play/quazatron) in
