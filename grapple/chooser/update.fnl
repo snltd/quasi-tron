@@ -2,8 +2,11 @@
 (local grapple-state (require :grapple.state))
 
 (fn update [dt]
-  (if (< 0 chooser-state.time-left)
-      (set chooser-state.time-left (- chooser-state.time-left dt))
-      (set grapple-state.phase :grapple)))
+  (let [new-time (- chooser-state.time-left dt)]
+    (if (< new-time 0)
+        (do
+          (set chooser-state.time-left 0)
+          (set grapple-state.phase :grapple))
+        (set chooser-state.time-left new-time))))
 
 {: update}

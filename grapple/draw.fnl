@@ -332,8 +332,12 @@
         (in-colour enemy-col (fn [] (side-icon left-x y)))
         (in-colour player-col (fn [] (side-icon right-x y)))))))
 
+(fn hud-row [label value x y]
+  (love.graphics.print label x y)
+  (love.graphics.printf value (+ x 100) y 300 "right"))
+
 (fn timer [x y]
-  (love.graphics.print (string.format "       %.03f" state.time-left) x y))
+  (hud-row "TIME" (string.format "%.02f" state.time-left) x y))
 
 (fn board []
   "Draws the grapple board and its trimmings"

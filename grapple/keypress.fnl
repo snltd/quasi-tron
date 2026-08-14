@@ -2,8 +2,7 @@
 (local state (require :grapple.state))
 (local chooser (require :grapple.chooser))
 (local actions (require :grapple.actions))
-
-(fn handler [key]
+ (fn handler [key]
   (let [side state.player-side
         board (. state.board side)]
     (if (and (= state.phase :grapple) (= key global-defs.keys.fire))

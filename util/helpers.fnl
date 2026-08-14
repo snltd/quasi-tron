@@ -32,6 +32,17 @@
   "Is val nil?"
   (not= nil val))
 
+; (fn string-contains? [s char]
+;   "does string s contain char c?"
+;   (not= nil (string.find s char true)))
+
+(fn array-contains? [tbl e]
+  (var found false)
+  (each [_ v (ipairs tbl)]
+    (when (= v e)
+      (set found true)))
+  found)
+
 ;; Debugging
 
 (fn pp [x]
@@ -72,6 +83,7 @@
   (. board.active-cells (state-cell-idx x y)))
 
 {: active?
+ : array-contains?
  : dec
  : flatten
  : half

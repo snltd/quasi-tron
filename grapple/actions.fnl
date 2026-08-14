@@ -77,14 +77,14 @@
                        defs.pip-ttl)
         (set board-side.pip-row 0)))))
 
-(fn pip-up! [board rows]
-  (if (< 1 board.pip-row)
-      (dec! board.pip-row)
-      (set board.pip-row rows)))
+(fn pip-up! [board-side rows]
+  (if (< 1 board-side.pip-row)
+      (dec! board-side.pip-row)
+      (set board-side.pip-row rows)))
 
-(fn pip-down! [board rows]
-  (if (< board.pip-row rows)
-      (inc! board.pip-row)
-      (set board.pip-row 1)))
+(fn pip-down! [board-side rows]
+  (if (< board-side.pip-row rows)
+      (inc! board-side.pip-row)
+      (set board-side.pip-row 1)))
 
 {: fire! : pip-down! : pip-up! : update-boxes : incoming : update-box}

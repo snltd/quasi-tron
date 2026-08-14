@@ -10,9 +10,12 @@
 (import-macros {: dec!} :util.macros)
 
 (fn update-timer [dt]
-  (if (< 0 state.time-left)
-      (set state.time-left (- state.time-left dt))
-      (set state.phase :adjudicate)))
+  (let [new-time (- state.time-left dt)]
+    (if (< new-time 0)
+        (do
+          (set state.time-left 0)
+          (set state.phase :adjudicate))
+        (set state.time-left new-time))))
 
 (fn update-board! [dt]
   (each [_side board (pairs state.board)]
@@ -31,7 +34,7 @@
   (set state.box-owners (actions.update-boxes state.box-owners state.board)))
 
 (fn grapple-key-handler [dt]
-  (set global-state.key-timer (- global-state.key-timer dt))
+  (dec! global-state.key-timer dt)
   (let [held (or (love.keyboard.isDown keys.up)
                  (love.keyboard.isDown keys.down))
         board (. state.board state.player-side)]
@@ -54,7 +57,7 @@
       (do
         (grapple-key-handler dt)
         (update-boxes!)
-        (enemy.move dt))
+        (enemy.move (. state.board state.enemy-side) state.enemy-skills dt))
       (= state.phase :chooser)
       (chooser.update dt)))
 

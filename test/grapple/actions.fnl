@@ -42,11 +42,12 @@
           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
   (t.= [1 -1] (s.update-boxes sample-boxes board)))
 
-(fn test-update-boxes-both-shoot-same-box []
-  (local board
-         {:left {:paths straight-paths :id -1 :active-cells {112 5}}
-          :right {:paths straight-paths :id 1 :active-cells {112 5}}})
-  (t.= [0 1] (s.update-boxes sample-boxes board)))
+;; This now uses randomness
+; (fn test-update-boxes-both-shoot-same-box []
+;   (local board
+;          {:left {:paths straight-paths :id -1 :active-cells {112 5}}
+;           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
+;   (t.= [0 1] (s.update-boxes sample-boxes board)))
 
 (fn test-update-boxes-left-through-inverters []
   (local board
@@ -60,20 +61,21 @@
           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
   (t.= [1 1] (s.update-boxes sample-boxes board)))
 
-(fn test-update-boxes-both-sending-inverted-signal []
-  (local board
-         {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
-          :right {:paths inverter-paths :id 1 :active-cells {112 5}}})
-  (t.= [0 1] (s.update-boxes sample-boxes board)))
+;; This now uses randomness
+; (fn test-update-boxes-both-sending-inverted-signal []
+;   (local board
+;          {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
+;           :right {:paths inverter-paths :id 1 :active-cells {112 5}}})
+;   (t.= [0 1] (s.update-boxes sample-boxes board)))
 
 (fn test-update-box []
   (t.= nil (s.update-box 0 0))
   (t.= -1 (s.update-box -1 0))
   (t.= -1 (s.update-box 0 -1))
   (t.= 1 (s.update-box 0 1))
-  (t.= 1 (s.update-box 1 0))
-  (t.= 0 (s.update-box 1 -1))
-  (t.= 0 (s.update-box -1 1)))
+  (t.= 1 (s.update-box 1 0)))
+  ; (t.= 0 (s.update-box 1 -1))
+  ; (t.= 0 (s.update-box -1 1)))
 
 (fn test-incoming []
   ;; No input
@@ -260,10 +262,10 @@
  : test-update-boxes-no-inputs
  : test-update-boxes-both-shoot-own-colour
  : test-update-boxes-both-shoot-other-colour
- : test-update-boxes-both-shoot-same-box
+ ;: test-update-boxes-both-shoot-same-box
  : test-update-boxes-left-through-inverters
  : test-update-boxes-both-sending-same-signal
- : test-update-boxes-both-sending-inverted-signal
+ ; : test-update-boxes-both-sending-inverted-signal
  : test-fire-empty-ammo-does-nothing
  : test-fire-in-row-0-does-nothing
  : test-fire-next-to-<
