@@ -7,7 +7,7 @@ in their colour wins.
 Differs from the original game in that:
 
 - Time is displayed in seconds, not arbitrary numbers
-- Oppononents are of varying difficulty . In Quazatron, so far as I can tell,
+- Opponents are of varying difficulty . In Quazatron, so far as I can tell,
   the only difference is the amount of pips they start with. Though enemy play
   is still essentially random, speed of movement varies, and "smarter" enemies
   reject decisions that will obviously waste shots.
