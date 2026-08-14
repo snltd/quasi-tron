@@ -21,4 +21,4 @@ table.insert(package.loaders, function(modname)
   end
 end)
 
-require("quasi-tron")
+require("quasitron")
