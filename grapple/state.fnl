@@ -17,6 +17,8 @@
                  :pips 0}}
  :box-owners [] ; the ID of the owner
  :deadlock-timer nil ; seconds
+ :deadlock-flash-show nil
+ :deadlock-flash-timer nil
  :enemy-side nil
  :enemy-move-timer nil
  :enemy-skills {

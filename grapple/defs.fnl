@@ -4,8 +4,8 @@
         :left [0.7 0.7 0.2]
         :right [0.2 0.2 0.7]
         :lines [0 0 0]}
- :pip-ttl 5
+ :pip-ttl 5 ; how long a pip fires for, in seoconds
  :firing-pip-col 3 ; where we put a pip once it's fired
- :deadlock-timer 4
- :grapple-time 20
+ :grapple-time 20 ; seconds for which we grapple
+ :deadlock-time 4 ; seconds for which we display *DEADLOCK*
 }

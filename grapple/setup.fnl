@@ -33,7 +33,7 @@
   (set state.board.right.pips params.enemy-pips)
   (set state.player-side :left)
   (set state.enemy-side :right)
-  (set state.deadlock-timer defs.deadlock-timer)
+  (set state.deadlock-timer defs.deadlock-time)
   (set state.time-left defs.grapple-time)
   (set state.enemy-move-timer 0)
   (set state.box-owners (box-owners defs.board.rows))

@@ -1,4 +1,4 @@
-(local {: set-phase!} (require :util.actions))
+(local {: set-game-phase!} (require :util.actions))
 
 (fn draw []
   (love.graphics.print "fire to start" 60 60 ))
@@ -9,7 +9,7 @@
 
 (fn fire []
   ;; will drop you into the game proper when/if it exists. For now, let's grapple!
-  (set-phase! :grapple { :player-pips 4 :enemy-pips 1 })
+  (set-game-phase! :grapple { :player-pips 4 :enemy-pips 1 })
 )
 
 {: draw : update : fire }
