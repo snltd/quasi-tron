@@ -24,56 +24,56 @@
         result)
       t))
 
-(fn test-update-boxes-no-inputs []
+(fn test-update-boxes!-no-inputs []
   (local board
          {:left {:paths straight-paths :id -1 :active-cells {}}
           :right {:paths straight-paths :id 1 :active-cells {}}})
-  (t.= sample-boxes (s.update-boxes sample-boxes board)))
+  (t.= sample-boxes (s.update-boxes! sample-boxes board)))
 
-(fn test-update-boxes-both-shoot-own-colour []
+(fn test-update-boxes!-both-shoot-own-colour []
   (local board
          {:left {:paths straight-paths :id -1 :active-cells {112 5}}
           :right {:paths straight-paths :id 1 :active-cells {212 5}}})
-  (t.= sample-boxes (s.update-boxes sample-boxes board)))
+  (t.= sample-boxes (s.update-boxes! sample-boxes board)))
 
-(fn test-update-boxes-both-shoot-other-colour []
+(fn test-update-boxes!-both-shoot-other-colour []
   (local board
          {:left {:paths straight-paths :id -1 :active-cells {212 5}}
           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
-  (t.= [1 -1] (s.update-boxes sample-boxes board)))
+  (t.= [1 -1] (s.update-boxes! sample-boxes board)))
 
 ;; This now uses randomness
-; (fn test-update-boxes-both-shoot-same-box []
+; (fn test-update-boxes!-both-shoot-same-box []
 ;   (local board
 ;          {:left {:paths straight-paths :id -1 :active-cells {112 5}}
 ;           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
-;   (t.= [0 1] (s.update-boxes sample-boxes board)))
+;   (t.= [0 1] (s.update-boxes! sample-boxes board)))
 
-(fn test-update-boxes-left-through-inverters []
+(fn test-update-boxes!-left-through-inverters []
   (local board
          {:left {:paths inverter-paths :id -1 :active-cells {112 5 212 5}}
           :right {:paths straight-paths :id 1 :active-cells {}}})
-  (t.= [1 1] (s.update-boxes sample-boxes board)))
+  (t.= [1 1] (s.update-boxes! sample-boxes board)))
 
-(fn test-update-boxes-both-sending-same-signal []
+(fn test-update-boxes!-both-sending-same-signal []
   (local board
          {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
           :right {:paths straight-paths :id 1 :active-cells {112 5}}})
-  (t.= [1 1] (s.update-boxes sample-boxes board)))
+  (t.= [1 1] (s.update-boxes! sample-boxes board)))
 
 ;; This now uses randomness
-; (fn test-update-boxes-both-sending-inverted-signal []
+; (fn test-update-boxes!-both-sending-inverted-signal []
 ;   (local board
 ;          {:left {:paths inverter-paths :id -1 :active-cells {112 5}}
 ;           :right {:paths inverter-paths :id 1 :active-cells {112 5}}})
-;   (t.= [0 1] (s.update-boxes sample-boxes board)))
+;   (t.= [0 1] (s.update-boxes! sample-boxes board)))
 
 (fn test-update-box []
-  (t.= nil (s.update-box 0 0))
-  (t.= -1 (s.update-box -1 0))
-  (t.= -1 (s.update-box 0 -1))
-  (t.= 1 (s.update-box 0 1))
-  (t.= 1 (s.update-box 1 0)))
+  (t.= nil (s.update-box! 0 0))
+  (t.= -1 (s.update-box! -1 0))
+  (t.= -1 (s.update-box! 0 -1))
+  (t.= 1 (s.update-box! 0 1))
+  (t.= 1 (s.update-box! 1 0)))
   ; (t.= 0 (s.update-box 1 -1))
   ; (t.= 0 (s.update-box -1 1)))
 
@@ -259,13 +259,13 @@
  : test-pip-down-bottom
  : test-incoming
  : test-update-box
- : test-update-boxes-no-inputs
- : test-update-boxes-both-shoot-own-colour
- : test-update-boxes-both-shoot-other-colour
- ;: test-update-boxes-both-shoot-same-box
- : test-update-boxes-left-through-inverters
- : test-update-boxes-both-sending-same-signal
- ; : test-update-boxes-both-sending-inverted-signal
+ : test-update-boxes!-no-inputs
+ : test-update-boxes!-both-shoot-own-colour
+ : test-update-boxes!-both-shoot-other-colour
+ ;: test-update-boxes!-both-shoot-same-box
+ : test-update-boxes!-left-through-inverters
+ : test-update-boxes!-both-sending-same-signal
+ ; : test-update-boxes!-both-sending-inverted-signal
  : test-fire-empty-ammo-does-nothing
  : test-fire-in-row-0-does-nothing
  : test-fire-next-to-<
