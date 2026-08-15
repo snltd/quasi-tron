@@ -25,6 +25,10 @@
 
 (fn launch [params]
   (set state.phase :chooser)
+  (set state.board.left.active-pips [])
+  (set state.board.right.active-pips [])
+  (set state.board.left.active-cells [])
+  (set state.board.right.active-cells [])
   (set state.board.left.pips params.player-pips)
   (set state.board.right.pips params.enemy-pips)
   (set state.player-side :left)

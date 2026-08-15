@@ -4,8 +4,8 @@
 (local chooser (require :grapple.chooser))
 (local {: pp : sum : inc : dec : half : active?} (require :util.helpers))
 
-(local offset-x 100)
-(local offset-y 150)
+(local offset-x 130)
+(local offset-y 180)
 (local x-scale 25)
 (local y-scale 28)
 (local triangle-height 0.4)
@@ -306,12 +306,13 @@
           (in-colour enemy-col (fn [] (side-icon left-x y)))
           (in-colour player-col (fn [] (side-icon right-x y)))))))
 
-(fn hud-row [label value x y]
-  (love.graphics.print label x y)
-  (love.graphics.printf value (+ x 100) y 300 "right"))
-
-(fn timer [x y]
-  (hud-row "TIME" (string.format "%.02f" state.time-left) x y))
+(fn timer [label value]
+  (let [left (sx 1)
+        top (sy (+ 3 defs.board.rows))
+        value (string.format "%.02f" value)
+        value-offset 130]
+  (love.graphics.print label left top)
+  (love.graphics.printf value (+ value-offset left) top 140 :right)))
 
 (fn draw-deadlock []
   (gwrap (fn []
@@ -349,10 +350,8 @@
   (love.graphics.pop)
   (side-icons)
   (central-column)
-  (if (= state.phase :chooser)
-      (chooser.draw.timer (sx 0) (sy (+ 3 defs.board.rows))))
-  (if (= state.phase :grapple)
-      (timer (sx 0) (sy (+ 3 defs.board.rows))))
-  (if (= state.phase :deadlock) (draw-deadlock)))
+  (if (= state.phase :chooser) (timer "COLOUR" chooser.state.time-left)
+      (= state.phase :grapple) (timer "TIME" state.time-left)
+      (= state.phase :deadlock) (draw-deadlock)))
 
 {: board}
