@@ -1,4 +1,4 @@
-(local chooser (require :grapple.chooser))
+(local chooser (require :grapple.chooser.setup))
 (local data (require :data))
 (local defs (require :grapple.defs))
 (local state (require :grapple.state))
