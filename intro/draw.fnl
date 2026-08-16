@@ -9,7 +9,7 @@
 
 (fn fire []
   ;; will drop you into the game proper when/if it exists. For now, let's grapple!
-  (set-game-phase! :grapple { :player-pips 4 :enemy-pips 1 })
+  (set-game-phase! :grapple :r8)
 )
 
 {: draw : update : fire }

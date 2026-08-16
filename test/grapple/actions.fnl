@@ -15,15 +15,6 @@
        [(h.utf8-chars "───────S---x")
         (h.utf8-chars "───────S---x")])
 
-(fn deep-clone [t]
-  "helper function for tests"
-  (if (= (type t) :table)
-      (let [result {}]
-        (each [k v (pairs t)]
-          (tset result k (deep-clone v)))
-        result)
-      t))
-
 (fn test-update-boxes!-no-inputs []
   (local board
          {:left {:paths straight-paths :id -1 :active-cells {}}
@@ -115,7 +106,7 @@
             :pips 0
             :active-cells []
             :active-pips []})
-  (local expected (deep-clone b))
+  (local expected (h.deep-clone b))
   (s.fire! b)
   (t.= expected b))
 
@@ -125,7 +116,7 @@
             :pips 4
             :active-cells []
             :active-pips []})
-  (local expected (deep-clone b))
+  (local expected (h.deep-clone b))
   (s.fire! b)
   (t.= expected b))
 
@@ -177,7 +168,7 @@
             :pips 3
             :active-cells []
             :active-pips []})
-  (local expected (deep-clone b))
+  (local expected (h.deep-clone b))
   (s.fire! b)
   (t.= expected b))
 

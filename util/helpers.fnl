@@ -77,6 +77,14 @@
   (icollect [c (s:gmatch "[%z\001-\127\194-\244][\128-\191]*")]
     c))
 
+(fn deep-clone [t]
+  (if (= (type t) :table)
+      (let [result {}]
+        (each [k v (pairs t)]
+          (tset result k (deep-clone v)))
+        result)
+      t))
+
 ;; State things
 ; 
 (fn active? [x y board]
@@ -85,6 +93,7 @@
 {: active?
  : array-contains?
  : dec
+ : deep-clone
  : flatten
  : half
  : inc

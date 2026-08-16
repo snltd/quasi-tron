@@ -1,9 +1,12 @@
 (local global-defs (require :global-defs))
 (local global-state (require :global-state))
+(local city (require :city))
 (local grapple (require :grapple))
+(local select-components (require :select-components))
 (local {: half} (require :util.helpers))
 (local fonts (require :util.fonts))
 (local intro (require :intro.draw))
+(local {: set-game-phase!} (require :util.actions))
 
 (fn love.load []
   (math.randomseed (os.time))
@@ -11,7 +14,11 @@
   (fonts.setup)
   (love.graphics.setFont fonts.display-font)
   (love.window.setMode global-defs.size.window.width
-                       global-defs.size.window.height {:resizable true}))
+                       global-defs.size.window.height {:resizable true})
+  (set global-state.player global-defs.player)
+  (set global-state.player.hp 20)
+  (set-game-phase! :grapple {:robot-id :r8}))
+; (set-game-phase! :select-components {:robot-id :r8 :grapple-score 5}))
 
 (fn love.draw []
   (let [(win-w win-h) (love.graphics.getDimensions)
@@ -22,16 +29,20 @@
     (love.graphics.push)
     (love.graphics.translate offset-x offset-y)
     (love.graphics.scale scale scale)
-    (if (= global-state.game-phase :grapple) (grapple.draw)
+    (if (= global-state.game-phase :city) (city.draw)
+        (= global-state.game-phase :grapple) (grapple.draw)
+        (= global-state.game-phase :select-components) (select-components.draw)
         (= global-state.game-phase :intro) (intro.draw))
     (love.graphics.pop)))
 
 (fn love.update [dt]
-  (if (= global-state.game-phase :grapple) (grapple.update dt)
+  (if (= global-state.game-phase :city) (city.update dt)
+      (= global-state.game-phase :grapple) (grapple.update dt)
       (= global-state.game-phase :intro) (intro.update dt)))
 
 ;; we don't need/want repeat on the fire
 (fn love.keypressed [key]
   (if (= key :escape) (love.event.quit)) ; for now
   (if (= global-state.game-phase :grapple) (grapple.keypress key)
+      (= global-state.game-phase :select-components) (select-components.keypress key)
       (= global-state.game-phase :intro) (intro.fire)))
