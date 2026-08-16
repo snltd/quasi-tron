@@ -7,7 +7,7 @@
 (local {: set-game-phase!} (require :util.actions))
 (local {: pos?} (require :util.helpers))
 (local {: keys} (require :global-defs))
-(local {: nil? : sum} (require :util.helpers))
+(local {: pp : nil? : sum} (require :util.helpers))
 (import-macros {: dec! : inc!} :util.macros)
 
 (fn end-grapple-phase []
@@ -16,36 +16,41 @@
       (tset board.active-cells idx (- ttl 10000))))
   (set state.time-left 0)
   (let [score (sum state.box-owners)]
-    (if (= 0 score) (do
-    (set state.deadlock-flash-show true)
-    (set state.deadlock-flash-timer 0)
-      (set state.phase :deadlock))
+    (set state.message-flash-timer 0)
+    (set state.message-flash-show true)
+    (if (= 0 score) (set state.phase :deadlock)
         (or (and (< score 0) (= state.enemy-side :right))
             (and (< 0 score) (= state.enemy-side :left)))
-        (set-game-phase! :select-components (math.abs score))
-        (set-game-phase! :main-game {:injured true}))))
+        (when (= state.phase :grapple)
+          (set state.final-score score)
+          (set state.phase :winner))
+        (set state.phase :failed))))
 
-(fn update-deadlock-timer [dt]
-  (inc! state.deadlock-flash-timer dt)
-  (dec! state.deadlock-timer dt)
-
-  (if state.deadlock-flash-show
-    (when (<= 0.9 state.deadlock-flash-timer )
-      (set state.deadlock-flash-timer 0)
-      (set state.deadlock-flash-show false))
-    (when (<= 0.3 state.deadlock-flash-timer )
-      (set state.deadlock-flash-timer 0)
-      (set state.deadlock-flash-show true)))
-
-  (if (<= state.deadlock-timer 0)
-      (set-game-phase! :grapple {:player-pips 3 :enemy-pips 1})))
+(fn update-message-timer [dt]
+  (inc! state.message-flash-timer dt)
+  (dec! state.message-timer dt)
+  (if state.message-flash-show
+      (when (<= 0.9 state.message-flash-timer)
+        (set state.message-flash-timer 0)
+        (set state.message-flash-show false))
+      (when (<= 0.3 state.message-flash-timer)
+        (set state.message-flash-timer 0)
+        (set state.message-flash-show true)))
+  (if (<= state.message-timer 0)
+      (if (= state.phase :winner)
+          (set-game-phase! :select-components
+                           {:robot-id state.enemy-id
+                            :grapple-score (math.abs state.final-score)})
+          (= state.phase :failed)
+            (set-game-phase! :city {:injured true})
+          (set-game-phase! :grapple {:robot-id state.enemy-id}))))
 
 (fn update-grapple-timer [dt]
   (if (= state.phase :grapple)
-  (let [new-time (- state.time-left dt)]
-    (if (< new-time 0)
-        (end-grapple-phase)
-        (set state.time-left new-time)))))
+      (let [new-time (- state.time-left dt)]
+        (if (< new-time 0)
+            (end-grapple-phase)
+            (set state.time-left new-time)))))
 
 (fn update-board! [dt]
   (each [_side board (pairs state.board)]
@@ -82,13 +87,15 @@
 (fn grapple-update [dt]
   (grapple-key-handler dt)
   (update-boxes!)
-  (enemy.move (. state.board state.enemy-side) state.enemy-skills dt))
+  (enemy.move (. state.board state.enemy-side) state.enemy.grapple dt))
 
 (fn update [dt]
   (update-board! dt)
   (update-grapple-timer dt)
   (if (= state.phase :grapple) (grapple-update dt)
       (= state.phase :chooser) (chooser.update dt)
-      (= state.phase :deadlock) (update-deadlock-timer dt)))
+      (= state.phase :winner) (update-message-timer dt)
+      (= state.phase :failed) (update-message-timer dt)
+      (= state.phase :deadlock) (update-message-timer dt)))
 
 {: update}

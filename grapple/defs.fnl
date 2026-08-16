@@ -6,6 +6,6 @@
         :lines [0 0 0]}
  :pip-ttl 5 ; how long a pip fires for, in seoconds
  :firing-pip-col 3 ; where we put a pip once it's fired
- :grapple-time 20 ; seconds for which we grapple
- :deadlock-time 4 ; seconds for which we display *DEADLOCK*
+ :grapple-time 15; seconds for which we grapple
+ :message-time 3.3 ; seconds for which we display *DEADLOCK*
 }

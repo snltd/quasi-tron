@@ -1,5 +1,8 @@
+(local chooser (require :grapple.chooser))
+(local data (require :data))
 (local defs (require :grapple.defs))
 (local state (require :grapple.state))
+(local global-state (require :global-state))
 (local {: paths} (require :grapple.paths))
 (local {: utf8-chars : flatten} (require :util.helpers))
 
@@ -21,25 +24,31 @@
 
 (fn box-owners [board-rows]
   "Alternate colours for the initial state of the central column boxes"
-  (fcollect [i 1 board-rows] (if (= 0 (% i 2)) -1 1)))
+  (fcollect [i 1 board-rows]
+    (if (= 0 (% i 2)) -1 1)))
 
-(fn launch [params]
-  (set state.phase :chooser)
-  (set state.board.left.active-pips [])
-  (set state.board.right.active-pips [])
-  (set state.board.left.active-cells [])
-  (set state.board.right.active-cells [])
-  (set state.board.left.pips params.player-pips)
-  (set state.board.right.pips params.enemy-pips)
-  (set state.player-side :left)
-  (set state.enemy-side :right)
-  (set state.deadlock-timer defs.deadlock-time)
-  (set state.time-left defs.grapple-time)
-  (set state.enemy-move-timer 0)
-  (set state.box-owners (box-owners defs.board.rows))
-  (set state.board.left.paths (board-paths defs.board.rows))
-  (set state.board.right.paths (board-paths defs.board.rows)))
+(fn launch [{: robot-id}]
+  (chooser.launch)
+  (let [enemy (. data.robots robot-id)]
+    (set state.enemy-id robot-id)
+    (set state.board.left.active-cells [])
+    (set state.board.left.active-pips [])
+    (set state.board.left.paths (board-paths defs.board.rows))
+    (set state.board.left.pip-row 0)
+    (set state.board.left.pips global-state.player.pips)
+    (set state.board.right.active-cells [])
+    (set state.board.right.active-pips [])
+    (set state.board.right.paths (board-paths defs.board.rows))
+    (set state.board.right.pips enemy.grapple.pips)
+    (set state.board.right.pip-row 0)
+    (set state.box-owners (box-owners defs.board.rows))
+    (set state.message-timer defs.message-time)
+    (set state.enemy-move-timer 0)
+    (set state.enemy-side :right)
+    (set state.enemy enemy)
+    (set state.phase :chooser)
+    (set state.player-side :left)
+    (set state.time-left defs.grapple-time)))
 
 ;; box-owners and paths exported for tests
-{: launch : box-owners : board-paths }
-
+{: launch : box-owners : board-paths}

@@ -1,4 +1,5 @@
 (local state (require :grapple.state))
+
 (local fonts (require :util.fonts))
 (local defs (require :grapple.defs))
 (local chooser (require :grapple.chooser))
@@ -32,6 +33,8 @@
 
 (fn sx [n] (+ offset.x (* n scale.x)))
 (fn sy [n] (+ offset.y (* n scale.y)))
+
+(local text-y (sy (+ 3 defs.board.rows)))
 
 (fn gwrap [f]
   "convenience wrapper for temporarily changing colour, line-width etc"
@@ -68,9 +71,9 @@
       (set pos (+ pos cycle)))))
 
 (fn _─ [colour x y board]
-  (let [x-left  (sx x)
+  (let [x-left (sx x)
         x-right (sx (inc x))
-        y-px    (sy y)]
+        y-px (sy y)]
     (if (active? x y board)
         (in-colour colour
                    (fn []
@@ -278,7 +281,7 @@
 (fn pip-arsenal [board]
   "Draws the column of pips the player or enemy has in reserve"
   (let [left-offset -2]
-    (for [i 1 board.pips]
+    (for [i 1 (dec board.pips)]
       (▶ left-offset i true))))
 
 (fn player-pip [side]
@@ -323,19 +326,27 @@
 ;; fnlfmt: skip
 (fn timer [label value]
   (let [left  (sx 1)
-        top   (sy (+ 3 defs.board.rows))
+        top   text-y
         value (string.format "%.02f" value)
-        value-offset 130]
+        value-offset 80]
     (love.graphics.print label left top)
     (love.graphics.printf value (+ value-offset left) top 140 :right)))
 
-(fn draw-deadlock []
-  (if state.deadlock-flash-show
+(fn draw-message [message]
+  (if state.message-flash-show
       (gwrap (fn []
                (love.graphics.setFont fonts.big-font)
-               (love.graphics.printf "* D E A D L O C K *" 0
-                                     (sy (+ defs.board.rows 3))
+               (love.graphics.printf message 0 (sy (+ defs.board.rows 3))
                                      global-defs.size.window.width :center)))))
+
+(fn draw-failed []
+  (draw-message "FAILED"))
+
+(fn draw-winner []
+  (draw-message "SECURITY UNIT INTERFACED"))
+
+(fn draw-deadlock []
+  (draw-message "> DEADLOCK <"))
 
 (fn board []
   "Draws the grapple board and its trimmings"
@@ -368,6 +379,10 @@
   (central-column)
   (if (= state.phase :chooser) (timer "COLOUR" chooser.state.time-left)
       (= state.phase :grapple) (timer "TIME" state.time-left)
-      (= state.phase :deadlock) (draw-deadlock)))
+      (= state.phase :winner) (draw-winner)
+      (= state.phase :failed) (draw-failed)
+      (= state.phase :deadlock) (draw-deadlock))
+  (if (or (= state.phase :grapple) (= state.phase :chooser))
+      (love.graphics.print state.enemy.name (sx 20) text-y)))
 
 {: board}

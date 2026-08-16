@@ -1,1 +1,1 @@
-{ :time-left 5 } ; seconds
+{ :time-left nil } ; seconds

@@ -2,5 +2,10 @@
 (local draw (require :grapple.chooser.draw))
 (local update (require :grapple.chooser.update))
 (local keypress (require :grapple.chooser.keypress))
+(local setup (require :grapple.chooser.setup))
 
-{: state :update update.update :keypress keypress.handler : draw}
+{:launch setup.launch
+ : state
+ :update update.update
+ :keypress keypress.handler
+ : draw}
