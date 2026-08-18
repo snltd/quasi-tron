@@ -25,7 +25,7 @@
   (< 0 val))
 
 (fn not-pos? [val]
-  "Is val less than or eqaul to zero?"
+  "Is val less than or equal to zero?"
   (<= val 0))
 
 (fn neg? [val]
