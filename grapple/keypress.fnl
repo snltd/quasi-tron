@@ -6,9 +6,8 @@
 (fn handler [key]
   (let [side state.player-side
         board (. state.board side)]
-    (if (and (= state.phase :grapple) (= key global-defs.keys.fire))
-        (actions.fire! board)
-        (= state.phase :chooser)
-        (chooser.keypress key))))
+    (match state.phase
+      (where :grapple (= key global-defs.keys.fire)) (actions.fire! board)
+      :chooser (chooser.keypress key))))
 
 {: handler}

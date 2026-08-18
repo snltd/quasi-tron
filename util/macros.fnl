@@ -7,4 +7,8 @@
   "Increment token by 1, or by opt-val if given"
   `(set ,token (if (nil? ,opt-val) (+ ,token 1) (+ ,token ,opt-val))))
 
-{: dec! : inc!}
+(fn zero! [token]
+  "set token to zero"
+  `(set ,token 0))
+
+{: dec! : inc! :  zero! }

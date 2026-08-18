@@ -21,6 +21,21 @@
   (t.= false (h.pos? 0))
   (t.= false (h.pos? -1)))
 
+(fn test-neg? []
+  (t.= true (h.neg? -1))
+  (t.= false (h.neg? 1))
+  (t.= false (h.neg? 0)))
+
+(fn test-not-pos? []
+  (t.= true (h.not-pos? -1))
+  (t.= true (h.not-pos? 0))
+  (t.= false (h.not-pos? 1)))
+
+(fn test-not-neg? []
+  (t.= false (h.not-neg? -1))
+  (t.= true (h.not-neg? 1))
+  (t.= true (h.not-neg? 0)))
+
 (fn test-nil? []
   (t.= true (h.nil? nil))
   (t.= false (h.nil? false))
@@ -52,6 +67,9 @@
  : test-pos?
  : test-nil?
  : test-not-nil?
-: test-active?
+ : test-neg?
+ : test-not-neg?
+ : test-not-pos?
+ : test-active?
  : test-flatten
  : test-sum}

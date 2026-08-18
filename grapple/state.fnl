@@ -25,5 +25,5 @@
  :enemy-move-timer nil
  :phase :chooser
  :player-side nil
- :final-score 0
+ :final-score nil
  :time-left nil}

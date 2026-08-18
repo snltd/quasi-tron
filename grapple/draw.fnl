@@ -1,10 +1,12 @@
+(local { : in-colour  : gwrap } (require :util.draw))
 (local state (require :grapple.state))
-
-(local fonts (require :util.fonts))
 (local defs (require :grapple.defs))
 (local chooser (require :grapple.chooser))
 (local global-defs (require :global-defs))
-(local {: nil? : sum : inc : dec : half : active?} (require :util.helpers))
+(local fonts (require :util.fonts))
+(local {: nil? : sum : inc : dec : half : pos? : neg? : active?}
+       (require :util.helpers))
+
 (import-macros {: dec! : inc!} :util.macros)
 
 ;; cell measurements
@@ -35,17 +37,6 @@
 (fn sy [n] (+ offset.y (* n scale.y)))
 
 (local text-y (sy (+ 3 defs.board.rows)))
-
-(fn gwrap [f]
-  "convenience wrapper for temporarily changing colour, line-width etc"
-  (love.graphics.push :all)
-  (f)
-  (love.graphics.pop))
-
-(fn in-colour [col f]
-  (gwrap (fn []
-           (love.graphics.setColor (unpack col))
-           (f))))
 
 (fn continue-line [x y board]
   (for [i (inc x) (length (. board.paths 1))]
@@ -105,10 +96,11 @@
         y-apex   (sy y)
         y-bottom (sy (+ y triangle.h))
         y-top    (sy (- y triangle.h))]
-    (if (not omit-line-segment)
+    (when (not omit-line-segment)
         (if (= x defs.firing-pip-col)
             ; so there isn't a gap from the firing pip
-            (in-colour side-colour (fn [] (─ x y board))) (─ x y board)))
+            (in-colour side-colour (fn [] (─ x y board)))
+            (─ x y board)))
     (in-colour side-colour
                (fn []
                  (love.graphics.polygon :fill x-apex y-apex x-base y-top x-base
@@ -251,9 +243,8 @@
 (fn who-is-winning? []
   "Returns the colour for the who-is-winning square"
   (let [score (sum state.box-owners)]
-    (if (< score 0) defs.gcol.left
-        (< 0 score) defs.gcol.right
-        ;; we'll need some flashing thing here at some point
+    (if (neg? score) defs.gcol.left
+        (pos? score) defs.gcol.right
         [0 0 0])))
 
 ;; fnlfmt: skip
@@ -288,22 +279,20 @@
   "Draws the pip the player is controlling, wherever the state says it should
    be. The paths are designed such that every row is always a valid position."
   (let [board (. state.board side)]
-    (if (< 0 board.pips)
+    (if (pos? board.pips)
         (▶ (+ 2 (- 1 triangle.w)) board.pip-row true))))
 
-(set parse-cell
-     (fn [col-idx row-idx cell board]
-       (if (= :─ cell) (─ col-idx row-idx board)
-           (= :- cell) (─invert col-idx row-idx board)
-           (= :◀ cell) (─ col-idx row-idx board)
-           (= :x cell) (─invert col-idx row-idx board)
-           (= :▶ cell) (▶ col-idx row-idx false board)
-           (= :┤ cell) (┤ col-idx row-idx board)
-           (= :├ cell) (├ col-idx row-idx board)
-           (= :S cell) (S col-idx row-idx)
-           (= :┐ cell) (┐ col-idx row-idx board)
-           (= :┘ cell) (┘ col-idx row-idx)
-           (= :◁ cell) (◁ col-idx row-idx board))))
+(set parse-cell (fn [col-idx row-idx cell board]
+                  (case cell
+                    (where (or "─" "◀")) (─ col-idx row-idx board)
+                    (where (or "-" :x)) (─invert col-idx row-idx board)
+                    "▶" (▶ col-idx row-idx false board)
+                    "┤" (┤ col-idx row-idx board)
+                    "├" (├ col-idx row-idx board)
+                    :S (S col-idx row-idx)
+                    "┐" (┐ col-idx row-idx board)
+                    "┘" (┘ col-idx row-idx)
+                    "◁" (◁ col-idx row-idx board))))
 
 (fn side-icon [x y]
   (love.graphics.circle :line x y 20))
@@ -311,17 +300,17 @@
 ;; fnlfmt: skip
 (fn side-icons []
   (let [left-x     (sx 0)
-        player-col [100 100 100]
-        enemy-col  [0 0 0]
+        player-clr [100 100 100]
+        enemy-clr [0 0 0]
         right-x    (sx (+ 4 (* 2 defs.board.cols)))
         y          (sy -3)]
-    (if (= state.player-side :left)
-        (do
-          (in-colour player-col (fn [] (side-icon left-x y)))
-          (in-colour enemy-col (fn [] (side-icon right-x y))))
-        (do
-          (in-colour enemy-col (fn [] (side-icon left-x y)))
-          (in-colour player-col (fn [] (side-icon right-x y)))))))
+    (case state.player-side
+      :left (do
+              (in-colour player-clr (fn [] (side-icon left-x y)))
+              (in-colour enemy-clr (fn [] (side-icon right-x y))))
+      :right (do
+              (in-colour enemy-clr (fn [] (side-icon left-x y)))
+              (in-colour player-clr (fn [] (side-icon right-x y)))))))
 
 ;; fnlfmt: skip
 (fn timer [label value]
@@ -333,14 +322,14 @@
     (love.graphics.printf value (+ value-offset left) top 140 :right)))
 
 (fn draw-message [message]
-  (if state.message-flash-show
-      (gwrap (fn []
-               (love.graphics.setFont fonts.big-font)
-               (love.graphics.printf message 0 (sy (+ defs.board.rows 3))
-                                     global-defs.size.window.width :center)))))
+  (when state.message-flash-show
+    (gwrap (fn []
+             (love.graphics.setFont fonts.big-font)
+             (love.graphics.printf message 0 (sy (+ defs.board.rows 3))
+                                   global-defs.size.window.width :center)))))
 
 (fn draw-failed []
-  (draw-message "FAILED"))
+  (draw-message :FAILED))
 
 (fn draw-winner []
   (draw-message "SECURITY UNIT INTERFACED"))
@@ -377,12 +366,13 @@
   (love.graphics.pop)
   (side-icons)
   (central-column)
-  (if (= state.phase :chooser) (timer "COLOUR" chooser.state.time-left)
-      (= state.phase :grapple) (timer "TIME" state.time-left)
-      (= state.phase :winner) (draw-winner)
-      (= state.phase :failed) (draw-failed)
-      (= state.phase :deadlock) (draw-deadlock))
-  (if (or (= state.phase :grapple) (= state.phase :chooser))
-      (love.graphics.print state.enemy.name (sx 20) text-y)))
+  (case state.phase
+    :chooser (timer :COLOUR chooser.state.time-left)
+    :grapple (timer :TIME state.time-left)
+    :winner (draw-winner)
+    :failed (draw-failed)
+    :deadlock (draw-deadlock))
+  (when (or (= state.phase :grapple) (= state.phase :chooser))
+    (love.graphics.print state.enemy.name (sx 20) text-y)))
 
 {: board}
