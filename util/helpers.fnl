@@ -24,6 +24,18 @@
   "Is val a positive number?"
   (< 0 val))
 
+(fn not-pos? [val]
+  "Is val less than or equal to zero?"
+  (<= val 0))
+
+(fn neg? [val]
+  "Is val a negative number?"
+  (< val 0))
+
+(fn not-neg? [val]
+  "Is val zero or greater?"
+  (<= 0 val))
+
 (fn nil? [val]
   "Is val nil?"
   (= nil val))
@@ -100,6 +112,9 @@
  : nil?
  : not-nil?
  : pos?
+ : not-pos?
+ : neg?
+ : not-neg?
  : pp
  : state-cell-idx
  : sum

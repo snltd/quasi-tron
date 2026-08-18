@@ -17,7 +17,8 @@
                        global-defs.size.window.height {:resizable true})
   (set global-state.player global-defs.player)
   (set global-state.player.hp 20)
-  (set-game-phase! :city))
+  (set-game-phase! :grapple {:robot-id :r8}))
+; (set-game-phase! :city))
 ; (set-game-phase! :select-components {:robot-id :r8 :grapple-score 5}))
 
 (fn love.draw []
@@ -29,20 +30,23 @@
     (love.graphics.push)
     (love.graphics.translate offset-x offset-y)
     (love.graphics.scale scale scale)
-    (if (= global-state.game-phase :city) (city.draw)
-        (= global-state.game-phase :grapple) (grapple.draw)
-        (= global-state.game-phase :select-components) (select-components.draw)
-        (= global-state.game-phase :intro) (intro.draw))
+    (case global-state.game-phase
+      :city (city.draw)
+      :grapple (grapple.draw)
+      :select-components (select-components.draw)
+      :intro (intro.draw))
     (love.graphics.pop)))
 
 (fn love.update [dt]
-  (if (= global-state.game-phase :city) (city.update dt)
-      (= global-state.game-phase :grapple) (grapple.update dt)
-      (= global-state.game-phase :intro) (intro.update dt)))
+  (case global-state.game-phase
+    :city (city.update dt)
+    :grapple (grapple.update dt)
+    :intro (intro.update dt)))
 
 ;; we don't need/want repeat on the fire
 (fn love.keypressed [key]
   (if (= key :escape) (love.event.quit)) ; for now
-  (if (= global-state.game-phase :grapple) (grapple.keypress key)
-      (= global-state.game-phase :select-components) (select-components.keypress key)
-      (= global-state.game-phase :intro) (intro.fire)))
+  (case global-state.game-phase
+    :grapple (grapple.keypress key)
+    :select-components (select-components.keypress key)
+    :intro (intro.fire)))
