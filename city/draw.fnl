@@ -11,6 +11,12 @@
     (love.graphics.draw player-png x y))
 )
 
+; (local tile-png (love.graphics.newImage :assets/tile.png))
+; (fn plain-tile [row col ]
+;   (let [[x y] (grid->screen col row)]
+;     (love.graphics.draw tile-png x y))
+; )
+
 (fn plain-tile [row col str]
   (let [[x y] (grid->screen col row)
         y-t y
