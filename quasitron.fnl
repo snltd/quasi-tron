@@ -17,8 +17,8 @@
                        global-defs.size.window.height {:resizable true})
   (set global-state.player global-defs.player)
   (set global-state.player.hp 20)
-  (set-game-phase! :grapple {:robot-id :r8}))
-; (set-game-phase! :city))
+  ; (set-game-phase! :grapple {:robot-id :r8}))
+  (set-game-phase! :city))
 ; (set-game-phase! :select-components {:robot-id :r8 :grapple-score 5}))
 
 (fn love.draw []
