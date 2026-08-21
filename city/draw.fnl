@@ -8,8 +8,7 @@
 
 (fn player [row col]
   (let [[x y] (grid->screen col row)]
-    (love.graphics.draw player-png x y))
-)
+    (love.graphics.draw player-png x y)))
 
 ; (local tile-png (love.graphics.newImage :assets/tile.png))
 ; (fn plain-tile [row col ]
@@ -29,11 +28,9 @@
     (love.graphics.polygon str x-l y-m x-m y-t x-r y-m x-m y-b)))
 
 (fn level []
-  (each [y row (ipairs (. levels state.map-key ))]
+  (each [y row (ipairs (. levels state.map-key))]
     (each [x cell (ipairs row)]
       (plain-tile x y (if (= cell 1) :line :fill))))
-  (player state.player-x state.player-y)
-
-      )
+  (player state.player.x state.player.y))
 
 {: level}
